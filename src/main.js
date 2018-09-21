@@ -4,10 +4,17 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 // import state from './state'
+
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
-
 Vue.use(Vuetify)
+
+import 'prismjs'
+import 'prismjs/themes/prism-coy.css'
+// import 'prismjs/plugins/line-numbers/prism-line-numbers.min.js'
+// import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
+import 'prismjs/components/prism-r'
+import 'prismjs/components/prism-python'
 
 Vue.config.productionTip = false
 

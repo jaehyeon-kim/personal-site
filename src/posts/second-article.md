@@ -26,6 +26,35 @@ And then some code:
 </div>
 ```
 
+And mroe code
+
+```r
+#
+library(magrittr)
+library(dplyr)
+
+sep <- function(s, delim=',') {
+    strsplit(s, delim) %>% 
+        unlist() %>% 
+        unique() %>% 
+        paste(collapse=',')
+}
+```
+
+```javascript
+'use strict'
+const path = require('path')
+const config = require('../config')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const packageConfig = require('../package.json')
+```
+
+```python
+#
+s = "Python syntax highlighting"
+print s
+```
+
 Here's an image:
 
 ![alt text](/static/logo.png "testing")
