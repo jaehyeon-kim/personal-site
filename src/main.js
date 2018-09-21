@@ -16,6 +16,9 @@ import 'prismjs/themes/prism-coy.css'
 import 'prismjs/components/prism-r'
 import 'prismjs/components/prism-python'
 
+import VuePrism from 'vue-prism'
+Vue.use(VuePrism)
+
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

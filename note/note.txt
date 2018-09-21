@@ -3,6 +3,7 @@ The Rise of the Butt-less Website
 
 yarn add -D prerender-spa-plugin markdown-with-front-matter-loader markdown-it highlight.js yaml-front-matter
 
+## depreciated
 yarn add -D json-loader markdown-it-front-matter-loader
 
 ##build/utils.js
