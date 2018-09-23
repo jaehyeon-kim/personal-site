@@ -3,7 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-// import state from './state'
+import store from './store'
 
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
@@ -15,6 +15,8 @@ import 'prismjs/themes/prism-coy.css'
 // import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/components/prism-r'
 import 'prismjs/components/prism-python'
+import 'prismjs/components/prism-docker'
+import 'prismjs/components/prism-bash'
 
 import VuePrism from 'vue-prism'
 Vue.use(VuePrism)
@@ -25,7 +27,7 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
-  // state,
+  store,
   components: { App },
   template: '<App/>'
 })

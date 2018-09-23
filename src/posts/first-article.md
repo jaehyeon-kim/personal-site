@@ -1,7 +1,7 @@
 ---
 title: Article One from MD
 description: In which the hero starts fresh
-created: 2017-10-01T08:01:50+02
+created: 2017-10-01
 updated:
 status: publish
 ---

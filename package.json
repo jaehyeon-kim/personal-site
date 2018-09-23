@@ -12,6 +12,7 @@
   "dependencies": {
     "prismjs": "^1.15.0",
     "vue": "^2.5.2",
+    "vue-infinite-loading": "^2.3.3",
     "vue-prism": "^1.0.5",
     "vue-router": "^3.0.1",
     "vuetify": "^1.0.0",

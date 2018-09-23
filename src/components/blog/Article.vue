@@ -17,11 +17,8 @@ export default {
     }
   },
   data() {
+    console.log(require(`../../posts/${this.id}.md`))
     return {
-      // article: {
-      //   title: this.id,
-      //   body: '<h2>Testing</h2><p>Ok, let\'s do more now!</p>',
-      // },
       article: require(`../../posts/${this.id}.md`), // eslint-disable-line global-require, import/no-dynamic-require
     }
   }
