@@ -17,7 +17,8 @@ Then the source files are copied to `/home/docker/<api-name>`. _rApache_ require
 
 Finaly _Suervisor_ is started with the [config file](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/api-supervisor.conf) that monitors/manages the APIs.
 
-```docker
+``` docker
+
 FROM rocker/r-ver:3.4
 MAINTAINER Jaehyeon Kim <dottami@gmail.com>
 
@@ -72,6 +73,7 @@ CMD ["/usr/bin/supervisord", "-c", "/home/docker/api-supervisor.conf"]
 As can be seen in [api-supervisor.conf](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/api-supervisor.conf), the _plumber_ API can be started at _port 9000_ as following. ([plumber-src.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/plumber/plumber-src.R) and [plumber-serve.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/plumber/plumber-serve.R) are discussed in [Part I](/2017/11/API-Development-with-R-Part-I))
 
 ```bash
+
 /usr/local/bin/Rscript /home/docker/plumber/plumber-serve.R
 ```
 
@@ -80,6 +82,7 @@ As can be seen in [api-supervisor.conf](https://github.com/jaehyeon-kim/r-api-de
 In order to utilize the built-in HTTP server of _Rserve_, `http.port` should be specified in [rserve.conf](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/rserve/rserve.conf). Also it is necessary to set `daemon disable` to manage _Rserve_ by _Supervisor_.
 
 ```bash
+
 http.port 8000
 remote disable
 auth disable
@@ -89,6 +92,7 @@ control disable
 Then it is possible to start the _Rserve_ API at _port 8000_ as shown below. ([rserve-src.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/rserve/rserve-src.R) is discussed in [Part I](/2017/11/API-Development-with-R-Part-I).)
 
 ```bash
+
 /usr/local/bin/R CMD Rserve --slave --RS-conf /home/docker/rserve/rserve.conf \
   --RS-source /home/docker/rserve/rserve-src.R
 ```
@@ -98,6 +102,7 @@ Then it is possible to start the _Rserve_ API at _port 8000_ as shown below. ([r
 The [site config file](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/rapache/rapache-site.conf) of the _rApache_ API is shown below.
 
 ```bash
+
 LoadModule R_module /usr/lib/apache2/modules/mod_R.so
 <Location /test>
     SetHandler r-handler
@@ -108,12 +113,14 @@ LoadModule R_module /usr/lib/apache2/modules/mod_R.so
 It is possible to start the _rApache_ API at _port 80_ as following. ([rapache-app.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/rapache/rapache-app.R) is discussed in [Part I](/2017/11/API-Development-with-R-Part-I).)
 
 ```bash
+
 apache2ctl -DFOREGROUND
 ```
 
 This Docker container can be built and run as following. Note the container's port 80 is mapped to the host's port 7000 to prevent a possible conflict.
 
 ```bash
+
 ## build
 docker build -t=api ./api/.
 
@@ -128,6 +135,7 @@ docker run -d -p 7000:80 -p 8000:8000 -p 9000:9000 --name api api:latest
 Example requests to the APIs and their responses are shown below. When a request includes both _n_ and _wait_ parameters, the APIs return 200 response as expected. Only the _Rserve_ API properly shows 400 response and the others need some modification.
 
 ```r
+
 library(httr)
 plumber200 <- POST(url = 'http://localhost:9000/test', encode = 'json',
                    body = list(n = 10, wait = 0.5))
@@ -138,6 +146,7 @@ unlist(c(api = 'plumber', status = status_code(plumber200),
 
 
 ```bash
+
 ##           api        status content.value 
 ##     "plumber"         "200"          "10"
 ```
@@ -145,6 +154,7 @@ unlist(c(api = 'plumber', status = status_code(plumber200),
 
 
 ```r
+
 rapache200 <- POST(url = 'http://localhost:7000/test', encode = 'json',
                    body = list(n = 10, wait = 0.5))
 unlist(c(api = 'rapache', status = status_code(rapache200),
@@ -154,6 +164,7 @@ unlist(c(api = 'rapache', status = status_code(rapache200),
 
 
 ```r
+
 ##           api        status content.value 
 ##     "rapache"         "200"          "10"
 ```
@@ -161,6 +172,7 @@ unlist(c(api = 'rapache', status = status_code(rapache200),
 
 
 ```r
+
 rserve200 <- POST(url = 'http://localhost:8000/test', encode = 'json',
                   body = list(n = 10, wait = 0.5))
 unlist(c(api = 'rserve', status = status_code(rserve200),
@@ -170,6 +182,7 @@ unlist(c(api = 'rserve', status = status_code(rserve200),
 
 
 ```r
+
 ##           api        status content.value 
 ##      "rserve"         "200"          "10"
 ```
@@ -177,6 +190,7 @@ unlist(c(api = 'rserve', status = status_code(rserve200),
 
 
 ```r
+
 rserve400 <- POST(url = 'http://localhost:8000/test', encode = 'json',
                   body = list(wait = 0.5))
 unlist(c(api = 'rserve', status = status_code(rserve400),
@@ -186,6 +200,7 @@ unlist(c(api = 'rserve', status = status_code(rserve400),
 
 
 ```r
+
 ##                     api                  status         content.message 
 ##                "rserve"                   "400" "Missing parameter - n"
 ```
@@ -198,6 +213,7 @@ A way to examine performance of an API is to look into how effectively it can se
 The test [locust file](https://github.com/jaehyeon-kim/r-api-demo/blob/master/locustfile.py) is shown below.
 
 ```python
+
 import json
 from locust import HttpLocust, TaskSet, task
 
@@ -218,6 +234,7 @@ class MyLocust(HttpLocust):
 With this file, testing can be made as following (eg for 3 concurrent requests).
 
 ```bash
+
 locust -f ./locustfile.py --host http://localhost:8000 --no-web -c 3 -r 3
 ```
 

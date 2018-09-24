@@ -63,7 +63,6 @@ cd path-to-folder
 yarn install
 npm run dev
 ```
-
 ### Libraries for the Apps
 
 #### Common libraries

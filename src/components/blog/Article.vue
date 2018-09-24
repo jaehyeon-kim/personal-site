@@ -24,3 +24,11 @@ export default {
   }
 }
 </script>
+
+<style>
+pre > code {
+  display: block;
+  padding: 1rem;
+  word-wrap: normal;
+}
+</style>
