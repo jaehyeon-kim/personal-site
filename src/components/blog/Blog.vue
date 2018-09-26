@@ -5,7 +5,10 @@
         DO somthing
         <v-btn absolute icon dark small center right color="grey darken-1" to='/'>
             <v-icon size="18">home</v-icon>
-        </v-btn>          
+        </v-btn>
+        <!-- <v-btn icon dark small center right color="grey darken-1" @click="onScroll(ee)">
+            <v-icon size="18">close</v-icon>
+        </v-btn> -->
       </v-toolbar>
       <div id="scroll-target" :style="'max-height:' + (this.windowHeight - 200) + 'px'" class="scroll-y">
         <v-layout v-scroll:#scroll-target="onScroll" column>
@@ -33,6 +36,7 @@
 </template>
 
 <script>
+// https://codepen.io/developerplus/pen/mBbjBq
 export default {
   name: 'Blog',
   data() {
@@ -52,7 +56,7 @@ export default {
     },
     onScroll (e) {
         this.offsetTop = e.target.scrollTop
-    }    
+    }
   },
   mounted() {
     this.$nextTick(function() {
@@ -60,6 +64,18 @@ export default {
         this.getWindowHeight()
     })
   },
+  // beforeRouteEnter (to, from, next) {
+  //   next(vm => {
+  //     setTimeout(() => {
+  //       // vm.offsetTop = vm.$store.getters['blog/savedOffset']
+  //       window.scrollTo(0, 1000);
+  //     }, 500);      
+  //   })
+  // },  
+  // beforeRouteLeave (to, from, next) {
+  //   this.$store.commit('blog/updateSavedOffset', this.offsetTop)
+  //   next()
+  // },
   beforeDestroy() {
     window.removeEventListener('resize', this.getWindowHeight);
   },  

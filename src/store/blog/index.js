@@ -1,11 +1,15 @@
 const state = {
-    articles: []
+    articles: [],
+    // savedOffset: 0
 }
 
 const getters = {
     articles (state) {
         return state.articles
-    }
+    },
+    // savedOffset (state) {
+    //     return state.savedOffset
+    // }
 }
 
 // https://webpack.js.org/api/module-methods/#require-context
@@ -29,7 +33,10 @@ const mutations = {
         })
         // console.log(articles)
         state.articles = articles
-    }
+    },
+    // updateSavedOffset (state, offset) {
+    //     state.savedOffset = offset
+    // }
 }
 
 const actions = {}

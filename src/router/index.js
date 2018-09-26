@@ -32,9 +32,18 @@ const routes = [
   }
 ]
 
+// const scrollBehavior = (to, from, savedPosition) => {
+//   if (savedPosition) {
+//     return { x: 1000, y: 1000 }
+//   } else {
+//     return { x: 0, y: 0 }
+//   }
+// }
+
 const router = new Router({
   mode: 'history',
-  routes: routes
+  // scrollBehavior,
+  routes: routes  
 })
 
 export default router
