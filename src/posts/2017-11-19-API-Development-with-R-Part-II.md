@@ -1,9 +1,9 @@
 ---
 title: 'API Development with R Part II'
 description: ''
-category: 'API'
+category: 'Web Service'
 tags: [R, Rserve, rApache, Plumber]
-created: 2017-05-26
+created: '2017-11-19'
 updated:
 status: publish
 ---

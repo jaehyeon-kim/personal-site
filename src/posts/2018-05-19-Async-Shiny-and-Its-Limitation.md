@@ -3,7 +3,7 @@ title: 'Async Shiny and Its Limitation'
 description: ''
 category: 'Web Development'
 tags: [R, Shiny, JavaScript]
-created: 2017-05-19
+created: '2017-05-19'
 status: publish
 ---
 A Shiny app is served by one (*single-threaded blocking*) process by [Open Source Shiny Server](https://www.rstudio.com/products/shiny/download-server/). This causes a scalability issue because all requests are handled one by one in a queue. Recently the creator of *Shiny* introduced the [promises](https://rstudio.github.io/promises/) package, which brings *asynchronous programming capabilities to R*. This is a remarkable step forward to web development in R.
