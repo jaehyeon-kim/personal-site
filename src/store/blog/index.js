@@ -1,15 +1,18 @@
 const state = {
-    articles: [],
-    // savedOffset: 0
+    articles: []
 }
 
 const getters = {
     articles (state) {
         return state.articles
     },
-    // savedOffset (state) {
-    //     return state.savedOffset
-    // }
+    dateToString () {
+        return str => {
+            let d = new Date(str)
+            const options = { year: 'numeric', month: 'long', day: 'numeric' }
+            return d.toLocaleDateString('en-US', options)
+        }
+    }
 }
 
 // https://webpack.js.org/api/module-methods/#require-context
@@ -33,10 +36,7 @@ const mutations = {
         })
         // console.log(articles)
         state.articles = articles
-    },
-    // updateSavedOffset (state, offset) {
-    //     state.savedOffset = offset
-    // }
+    }
 }
 
 const actions = {}

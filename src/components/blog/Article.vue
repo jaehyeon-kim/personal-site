@@ -1,12 +1,12 @@
 <template>
   <v-layout row>
     <v-flex xs10 md8 lg6 offset-xs1 offset-md2 offset-lg3>
-      <v-toolbar color="grey lighten-2" flat class="mb-2">
+      <v-toolbar color="grey lighten-2" flat class="mt-2 mb-2">
         <v-toolbar-title>
-          <div class="mt-3">
-            <span>{{ article.title }}</span>
-            <p class="caption">{{ `${article.created ? article.created.split('T')[0] : ''}`}}</p>
-          </div>          
+          <div>
+              <span class="headline">{{ article.title }}</span><br>
+              <span class="caption">{{ `${dateToString(article.created)}` }}</span><br>                      
+          </div>        
         </v-toolbar-title>
         <v-btn absolute icon dark small center right color="grey darken-1" to='/blog'>
             <v-icon size="25">navigate_before</v-icon>
@@ -31,12 +31,17 @@ export default {
     }
   },
   data() {
-    console.log(require(`../../posts/${this.id}.md`))
+    // console.log(require(`../../posts/${this.id}.md`))
     return {
       windowHeight: 0,
       offsetTop: 0,      
       article: require(`../../posts/${this.id}.md`), // eslint-disable-line global-require, import/no-dynamic-require
     }
+  },
+  computed: {
+    dateToString() {
+      return this.$store.getters['blog/dateToString']
+    }    
   },
   methods: {
     getWindowHeight(event) {

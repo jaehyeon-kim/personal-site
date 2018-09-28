@@ -1,11 +1,11 @@
 ---
 title: 'CRAN Package Recommender Part I'
-description: ''
 category: 'Analytics'
 tags: [R, Association Rules, Link Analysis]
 created: '2017-05-04'
 updated:
 status: publish
+description: 'One of the attractions of R is 10,000+ contrubuted packages that can be easily downloaded from the Comprehensive R Archive Network (CRAN). Due to the ever-growing number of packages, however, it is not easy to find interesting packages. CRAN Task Views is a good source but, at the time of wrting, it covers only about 2,700 packages. There are some websites that help search R related information such as RDocumentation or rdrr-io. However they seem to rely on full-text search so that extra effort is required to identify packages of interest. In this regard, it can be quite useful if there is a recommender system so that a set of packages are recommended by a package name or general keywords.'
 ---
 
 One of the attractions of R is 10,000+ [contrubuted packages](https://cran.r-project.org/web/packages/) that can be easily downloaded from the [Comprehensive R Archive Network (CRAN)](https://cran.r-project.org/). Due to the ever-growing number of packages, however, it is not easy to find interesting packages. [CRAN Task Views](https://cran.r-project.org/web/views/) is a good source but, at the time of wrting, it covers only about 2,700 packages. There are some websites that help search R related information such as [RDocumentation](https://www.rdocumentation.org/), [Rseek](http://rseek.org/) or [rdrr-io](https://rdrr.io/). However they seem to rely on *full-text search* so that extra effort is required to identify packages of interest. In this regard, it can be quite useful if there is a *recommender system* so that a set of packages are recommended by a *package name* or general *keywords*. 

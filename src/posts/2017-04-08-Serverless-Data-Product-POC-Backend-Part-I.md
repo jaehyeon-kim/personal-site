@@ -1,11 +1,11 @@
 ---
 title: 'Serverless Data Product POC Frontend Part I'
-description: ''
 category: 'Serverless'
 tags: [Lambda, API Gateway, R]
 created: '2017-04-08'
 updated:
 status: publish
+description: "This is the first post of Serverless Data Product POC series and I'm planning to introduce a data product in a serverless environment. For the backend, a simple logistic regression model is packaged and tested for AWS Lambda - R is not included in Lambda runtime so that it is packaged and run via the Python rpy2 package. Then the model is deployed at AWS Lambda and the Lambda function is exposed via Amazon API Gateway. For the frontend, a simple single page application is served from Amazon S3."
 ---
 
 Let say you've got a prediction model built in R and you'd like to *productionize* it, for example, by serving it in a web application. One way is exposing the model through an API that returns the predicted result as a web service. However there are many issues. Firstly R is not a language for API development although there may be some ways - eg the [plumber](https://github.com/trestletech/plumber) package. More importantly developing an API is not the end of the story as the API can't be served in a production system if it is not *deployed/managed/upgraded/patched/...* appropriately in a server or if it is not *scalable*, *protected via authentication/authorization* and so on. Therefore it requires quite a vast range of skill sets that cover both development and DevOps (engineering). 

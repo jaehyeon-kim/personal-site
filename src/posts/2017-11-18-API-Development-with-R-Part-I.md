@@ -1,11 +1,11 @@
 ---
 title: 'API Development with R Part I'
-description: ''
 category: 'Web Service'
 tags: [R, Rserve, rApache, Plumber]
 created: '2017-11-18'
 updated:
 status: publish
+description: 'This is 2 part series in relation to API development with R. In this post, serving an R function with plumber, Rserve and rApache is discussed. OpenCPU is not discussed partly because it could be overkill for API. Also its performance may be similar to rApache with Prefork Multi-Processing Module enabled. Then deploying the APIs in a Docker container, making example HTTP requests and their performance will be discussed in Part II.'
 ---
 API is an effective way of distributing analysis outputs to external clients. When it comes to API development with R, however, there are not many choices. Probably development would be made with [plumber](https://github.com/trestletech/plumber), [Rserve](https://www.rforge.net/Rserve/), [rApache](http://rapache.net/) or [OpenCPU](https://www.opencpu.org/) if a client or bridge layer to R is not considered. 
 

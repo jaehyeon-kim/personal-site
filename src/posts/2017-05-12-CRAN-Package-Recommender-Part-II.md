@@ -1,11 +1,11 @@
 ---
 title: 'CRAN Package Recommender Part II'
-description: ''
 category: 'Analytics'
 tags: [R, Association Rules, Link Analysis, Text Mining]
 created: '2017-05-12'
 updated:
 status: publish
+description: 'In the previous post, it was discussed to apply Hyperlink-Induced Topic Search (HITS) to association rules mining for creating a CARN package recommender. The link analysis algorithm gives more weights on transactions where strong cross-selling effects exist so that more relevant association rules can be mined for recommendation. Not all packages, however, are likely to be included in those rules and it is necessary to have a way to complement it. Kaminskas et al. (2015) discusses a recommender system for small retailers. In the paper, a combination of association rules and text-based similarity are utilized, which can be a good fit for the CRAN recommender. Before actual development, relevant data has to be downloaded/processed and it is the topic of this post.'
 ---
 
 In the previous post, it was discussed to apply *Hyperlink-Induced Topic Search (HITS)* to association rules mining for creating a CARN package recommender. The link analysis algorithm gives more weights on transactions where strong cross-selling effects exist so that more relevant association rules can be mined for recommendation. Not all packages, however, are likely to be included in those rules and it is necessary to have a way to complement it. [Kaminskas et al. (2015)](https://www.insight-centre.org/content/product-recommendation-small-scale-retailers-0) discusses a recommender system for small retailers. In the paper, a combination of association rules and text-based similarity are utilized, which can be a good fit for the CRAN recommender. Before actual development, relevant data has to be downloaded/processed and it is the topic of this post.

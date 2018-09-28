@@ -1,13 +1,13 @@
 ---
 title: 'Serverless Data Product POC Frontend Part IV'
-description: ''
 category: 'Serverless'
 tags: [Lambda, API Gateway, R, React]
 created: '2017-04-17'
 updated:
 status: publish
+description: 'In the previous posts, it is discussed how to package / deploy a R model with AWS Lambda and to expose the Lambda function via Amazon API Gateway. Main benefits of serverless architecture is cost-effectiveness and being hassle-free from provisioning/managing servers. While the API returns a predicted admission status value given GRE, GPA and Rank, there is an issue if it is served within a web application: Cross-Origin Resource Sharing (CORS). This post discusses how to resolve this issue by updating API configuration and the Lambda function handler  with a simple web application. Also it is illustrated how to host the application in a serverless environment.'
 ---
-In the previous posts, it is discussed how to package/deploy a [R](https://www.r-project.org/about.html) model at [AWS Lambda](https://aws.amazon.com/lambda/details/) and to expose the Lambda function via [Amazon API Gateway](https://aws.amazon.com/api-gateway/). Main benefits of **serverless architecture** is cost-effectiveness and being hassle-free from provisioning/managing servers. While the API returns a predicted admission status value given *GRE*, *GPA* and *Rank*, there is an issue if it is served within a web application: *Cross-Origin Resource Sharing (CORS)*. This post discusses how to resolve this issue by updating API configuration and the Lambda function handler  with a simple web application. Also it is illustrated how to host the application in a serverless environment.
+In the previous posts, it is discussed how to package/deploy a [R](https://www.r-project.org/about.html) model with [AWS Lambda](https://aws.amazon.com/lambda/details/) and to expose the Lambda function via [Amazon API Gateway](https://aws.amazon.com/api-gateway/). Main benefits of **serverless architecture** is cost-effectiveness and being hassle-free from provisioning/managing servers. While the API returns a predicted admission status value given *GRE*, *GPA* and *Rank*, there is an issue if it is served within a web application: *Cross-Origin Resource Sharing (CORS)*. This post discusses how to resolve this issue by updating API configuration and the Lambda function handler  with a simple web application. Also it is illustrated how to host the application in a serverless environment.
 
 * Backend
     * [Packaging R for AWS Lambda](/2017/04/Serverless-Data-Product-POC-Backend-Part-I.html)

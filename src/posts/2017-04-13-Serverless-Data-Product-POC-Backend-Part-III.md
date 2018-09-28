@@ -1,11 +1,11 @@
 ---
 title: 'Serverless Data Product POC Frontend Part III'
-description: ''
 category: 'Serverless'
 tags: [Lambda, API Gateway, R]
 created: '2017-04-13'
 updated:
 status: publish
+description: "In Part I of this series, R and necessary libraries/packages together with a Lambda function handler are packaged and saved to Amazon S3. Then, in Part II, the package is deployed at AWS Lambda after creating and assigning a role to the Lambda function. Although the Lambda function can be called via the Invoke API, it'll be much more useful if the function can be called as a web service (or API). In this post, it is discussed how to expose the Lambda function via Amazon API Gateway. After creating an API by integrating the Lambda function, it is protected with an API key. Finally a custom domain name is used as an alternative URL of the API."
 ---
 In [Part I](/2017/04/Serverless-Data-Product-POC-Backend-Part-I.html) of this series, R and necessary libraries/packages together with a Lambda function handler are packaged and saved to [Amazon S3](https://aws.amazon.com/s3/). Then, in [Part II](/2017/04/Serverless-Data-Product-POC-Backend-Part-II.html), the package is deployed at [AWS Lambda](https://aws.amazon.com/lambda/) after creating and assigning a role to the Lambda function. Although the Lambda function can be called via the Invoke API, it'll be much more useful if the function can be called as a web service (or API). In this post, it is discussed how to expose the Lambda function via [Amazon API Gateway](https://aws.amazon.com/api-gateway/). After creating an API by integrating the Lambda function, it is protected with an API key. Finally a custom domain name is used as an alternative URL of the API.
 

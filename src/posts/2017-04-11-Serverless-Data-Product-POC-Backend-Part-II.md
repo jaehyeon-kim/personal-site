@@ -1,11 +1,11 @@
 ---
 title: 'Serverless Data Product POC Frontend Part II'
-description: ''
 category: 'Serverless'
 tags: [Lambda, API Gateway, R]
 created: '2017-04-11'
 updated:
 status: publish
+description: 'In the previous post, serverless event-driven application development is introduced. Also how to package R, necessary libraries/packages and a Lambda function handler is discussed. No need of provising/managing servers is one of the key benefits of the architecture. It is also a cost-effective way of delivering a data product as functions are executed on-demand rather than in servers that run 24/7. Furthermore AWS Lambda free tier includes 1M free requests per month and 400,000 GB-seconds of compute time per month, which is available to both existing and new AWS customers indefinitely. (GB-seconds is applicable when execution is made with 1 GB of memory.) Lowering the size of memory increases the execution time and thus 3.2M seconds or about 37 days are free with 128 MB of memory (1 GB divided by 8) - note that CPU power is proportional to allocated memory.'
 ---
 
 In the [previous post](/2017/04/Serverless-Data-Product-POC-Backend-Part-I.html), **serverless** **event-driven** application development is introduced. Also how to package R, necessary libraries/packages and a Lambda function handler is discussed. No need of provising/managing servers is one of the key benefits of the architecture. It is also a cost-effective way of delivering a data product as functions are executed *on-demand* rather than in servers that run 24/7. Furthermore [AWS Lambda free tier](https://aws.amazon.com/lambda/pricing/) includes 1M free requests per month and 400,000 GB-seconds of compute time per month, which is available to both existing and new AWS customers indefinitely. (GB-seconds is applicable when execution is made with 1 GB of memory.) Lowering the size of memory increases the execution time and thus 3.2M seconds or about 37 days are free with 128 MB of memory (1 GB divided by 8) - note that CPU power is proportional to allocated memory.

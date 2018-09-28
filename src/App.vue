@@ -31,6 +31,9 @@ export default {
         { icon: 'reorder', title: 'Blog', link: '/blog' },
       ]
     }
-  }
+  },
+  created() {
+    this.$store.commit('blog/updateArticles')
+  }  
 }
 </script>
