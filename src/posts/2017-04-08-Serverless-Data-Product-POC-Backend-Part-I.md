@@ -1,5 +1,5 @@
 ---
-title: 'Serverless Data Product POC Frontend Part I'
+title: 'Serverless Data Product POC Backend Part I'
 category: 'Serverless'
 tags: [Lambda, API Gateway, R]
 created: '2017-04-08'
