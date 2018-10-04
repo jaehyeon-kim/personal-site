@@ -69,4 +69,23 @@ pre > code {
   padding: 1rem;
   word-wrap: normal;
 }
+
+img {
+    width:600px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto; 
+}
+
+blockquote {
+  background: #f9f9f9;
+  border-left: 10px solid #ccc;
+  margin: 1.5em 10px;
+  padding: 0.5em 10px;
+  quotes: "\201C""\201D""\2018""\2019";
+}
+
+blockquote p {
+  display: inline;
+}
 </style>

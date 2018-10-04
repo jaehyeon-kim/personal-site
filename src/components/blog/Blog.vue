@@ -3,7 +3,7 @@
         <v-layout row wrap>
             <v-flex xs10 sm8 md6 offset-xs1>
                 <v-card max-height="250" v-for="(article, i) in articles" :key="i" class="mb-3">
-                    <v-card-text>
+                    <v-card-text :style="{ cursor: 'pointer'}">
                         <div @click="openArticle(article)">
                             <span class="headline">{{ article.title }}</span><br>
                             <span class="caption">{{ `${dateToString(article.created)}` }}</span><br>                      
@@ -12,18 +12,19 @@
                     <v-divider light></v-divider>
                     <v-layout>
                         <div :class="isHidden ? 'flex xs12' : 'flex xs5'">
-                            <div @click="openArticle(article)">
+                            <div @click="openArticle(article)">                               
                                 <v-img
                                     :src="`/static/${article.slug}/main.png`"
                                     height="120"
                                     contain
                                     class="mt-1 mb-1"
+                                    :style="{ cursor: 'pointer'}"
                                 >
-                                </v-img>
+                                </v-img>                                
                             </div>
                         </div>
                         <v-flex xs7 class="hidden-sm-and-down">
-                            <v-card-text>
+                            <v-card-text :style="{ cursor: 'pointer'}">
                                 <div @click="openArticle(article)" class="caption mb-1">{{ article.description.substring(0, maxStr) + '... ' }}</div>
                             </v-card-text>      
                         </v-flex>
