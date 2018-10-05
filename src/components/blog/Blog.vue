@@ -1,7 +1,7 @@
 <template>
     <v-container fluid grid-list-lg>
         <v-layout row wrap>
-            <v-flex xs10 sm8 md6 offset-xs1>
+            <div :class="`${'flex xs10 sm8 md6 ' + (isHidden ? '' : 'offset-xs1')}`">
                 <v-card max-height="250" v-for="(article, i) in articles" :key="i" class="mb-3">
                     <v-card-text :style="{ cursor: 'pointer'}">
                         <div @click="openArticle(article)">
@@ -30,20 +30,11 @@
                         </v-flex>
                     </v-layout>
                 </v-card>
-            </v-flex>
-			<div :class="isHidden ? 'flex xs10 sm8 offset-xs1' : 'flex xs10 sm4'">
-                <v-layout column>
-                    <v-flex>
-                        <v-card height="200">
-                            First Card
-                        </v-card>
-                    </v-flex>
-                    <v-flex>
-                        <!-- <v-card height="400"> -->
-                            <app-tags-cloud></app-tags-cloud>
-                        <!-- </v-card> -->
-                    </v-flex>
-                </v-layout>
+            </div>
+			<div class="fixed" v-if="!isHidden">
+                <!-- <v-layout column> -->
+                    <app-blog-side></app-blog-side>
+                <!-- </v-layout> -->
 			</div>
         </v-layout>
     </v-container>
@@ -52,7 +43,7 @@
 <script>
 //height="400" width="530">
 // https://codepen.io/developerplus/pen/mBbjBq | https://www.thepolyglotdeveloper.com/blog/
-import TagsCloud from '@/components/blog/TagsCloud'
+import BlogSide from '@/components/blog/BlogSide'
 
 export default {
   name: 'Blog',
@@ -60,11 +51,12 @@ export default {
   data() {
     return {
         windowWidth: 0,
+        drawer: true
     }
   },  
   computed: {
     isHidden() {
-        return this.windowWidth < 960
+        return this.windowWidth < 1000
     },
     maxStr() {
         if (this.windowWidth < 960) {
@@ -92,13 +84,13 @@ export default {
   methods: {
     getWindowWidth(event) {
         this.windowWidth = document.documentElement.clientWidth
-    },      
+    },
     openArticle(article) {
         this.$router.push({ path: `/blog/${ article.slug }` })
     }
   },
   components: {
-      appTagsCloud: TagsCloud
+      appBlogSide: BlogSide
   },
   mounted() {
     this.$nextTick(function() {
@@ -107,7 +99,16 @@ export default {
     })
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.getWindowWidth);
+    window.removeEventListener('resize', this.getWindowWidth)
   } 
 }
 </script>
+
+<style>
+.fixed {
+  position: fixed;
+  width: 400px;
+  top:8%; 
+  right:4%;
+}
+</style>

@@ -1,8 +1,15 @@
 <template>
-    <v-card>
-        <!-- <p class="subheading">{{ `${'Tags (' + tagsFreq.map(x => x.name).length + ')'}` }}</p> -->
-        <highcharts class="chartContainer" :options="chartOptions" :updateArgs="updateArgs" :callback="initChart"></highcharts>
-    </v-card>
+    <div>
+        <v-flex>
+            <v-card height="200">
+                First Card
+            </v-card>
+        </v-flex>
+        <v-flex>
+            <!-- <p class="subheading">{{ `${'Tags (' + tagsFreq.map(x => x.name).length + ')'}` }}</p> -->
+            <highcharts class="chartContainer" :options="chartOptions" :updateArgs="updateArgs" :callback="initChart"></highcharts>
+        </v-flex>
+    </div>
 </template>
 
 <script>
@@ -31,16 +38,21 @@
 export default {
     data () {
         return {
-            updateArgs: [true, true, {duration: 1000}]            
+            updateArgs: [true, true, {duration: 1000}],
+            scrollY: 0
         }
     },
     methods: {
         initChart (chart) {
-            console.log(chart)
+            // console.log(chart)
             setTimeout(() => {
                 chart.reflow()
             }, 300)
-        }
+        },
+        getScrollY() {
+            this.scrollY = window.scrollY
+            console.log(this.scrollY)
+        }, 
     },
     computed: {
         tagsFreq () {
@@ -74,6 +86,15 @@ export default {
                 }
             }
         }
-    }
+    },
+    mounted() {
+        this.$nextTick(function() {
+            window.addEventListener('scroll', this.getScrollY)
+            this.getScrollY()
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('scroll', this.getScrollY)
+    } 
 }
 </script>

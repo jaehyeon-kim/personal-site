@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-toolbar dark app dense>
+    <v-toolbar dark app dense scroll-off-screen :scroll-threshold="threshold">
       <v-toolbar-title>
         <router-link to="/" tag="span" style="cursor: pointer;">Jaehyeon Kim</router-link>
       </v-toolbar-title>
@@ -27,6 +27,7 @@ export default {
   data () {
     return {
       fixed: false,
+      threshold: 100,
       items: [
         { icon: 'reorder', title: 'Blog', link: '/blog' },
       ]
