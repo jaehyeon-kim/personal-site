@@ -3,7 +3,7 @@
         <v-flex>
             <v-card>
                 <span class="subheading">{{ `${'Catagories (' + cats.map(x => x.name).length + ') '}` }}</span>
-                <span v-if="selection.col === 'category'"><a @click="reset">reset</a></span>
+                <span v-if="selection.col"><a @click="reset">reset</a></span>
                 <v-btn
                     v-for="cat in cats"
                     :key="cat.name"
@@ -17,8 +17,7 @@
             </v-card>
         </v-flex>
         <v-flex>
-            <span class="subheading">{{ `${'Tags (' + tags.map(x => x.name).length + ')'}` }}</span>
-            <span v-if="selection.col === 'tags'"><a @click="reset">reset</a></span>
+            <p class="subheading">{{ `${'Tags (' + tags.map(x => x.name).length + ')'}` }}</p>
             <highcharts class="chartContainer" :options="chartOptions" :updateArgs="updateArgs" :callback="initChart"></highcharts>
         </v-flex>
     </div>
@@ -56,6 +55,7 @@ export default {
     },
     methods: {
         initChart (chart) {
+            // console.log(chart)
             setTimeout(() => {
                 chart.reflow()
             }, 300)
@@ -71,7 +71,10 @@ export default {
                 col: null,
                 val: null
             })            
-        }
+        },
+        // getScrollY() {
+        //     this.scrollY = window.scrollY
+        // } 
     },
     computed: {
         cats () {
@@ -92,7 +95,7 @@ export default {
                 series: [{
                     type: 'wordcloud',
                     data: this.tags,
-                    name: 'Posts',
+                    name: 'Articles',
                     margin: 0,
                     padding: 0,                
                 }],
@@ -115,6 +118,15 @@ export default {
                 }
             }
         }
-    }
+    },
+    mounted() {
+        this.$nextTick(function() {
+            // window.addEventListener('scroll', this.getScrollY)
+            // this.getScrollY()
+        })
+    },
+    beforeDestroy() {
+        // window.removeEventListener('scroll', this.getScrollY)
+    } 
 }
 </script>

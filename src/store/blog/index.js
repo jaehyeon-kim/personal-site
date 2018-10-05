@@ -1,10 +1,17 @@
 const state = {
-    articles: []
+    articles: [],
+    selection: {
+        col: null,
+        val: null,
+    }
 }
 
 const getters = {
     articles (state) {
         return state.articles
+    },
+    selection (state) {
+        return state.selection
     },
     dateToString () {
         return str => {
@@ -13,18 +20,45 @@ const getters = {
             return d.toLocaleDateString('en-US', options)
         }
     },
-    tagsFreq (state) {
-        let tags = []
-        let freq = []
-        state.articles.map(x => x.tags).forEach(x => {
-            tags = tags.concat(x)
-        })
-        let uniqueTags = [...new Set(tags)]
-        uniqueTags.forEach(u => {
-            freq.push({ name: u, weight: tags.filter(t => t === u).length })
-        })
-        return freq
-    }
+    dist (state) {
+        return col => {
+            let elems = []
+            let dist = []
+            state.articles.map(x => x[col]).forEach(x => {
+                elems = elems.concat(x)
+            })
+            let uniqueElems = [...new Set(elems)]
+            uniqueElems.forEach(u => {
+                dist.push({ name: u, weight: elems.filter(x => x === u).length })
+            })
+            return dist
+        }
+    },
+    selected (state) {
+        let col = state.selection.col
+        let val = state.selection.val
+        if (col && val) {
+            let selc = []
+            if (col === 'category') {
+                selc = state.articles.filter(x => x.category === val)
+            } else {
+                selc = state.articles.filter(x => x.tags.includes(val))
+            }
+
+            return selc.sort((a, b) => {
+                if (a.created > b.created) return -1
+                if (a.created < b.created) return 1
+                return 0
+              })
+        } else {
+            return state.articles.sort((a, b) => {
+                if (a.created > b.created) return -1
+                if (a.created < b.created) return 1
+                return 0
+              })
+        }
+
+    }    
 }
 
 // https://webpack.js.org/api/module-methods/#require-context
@@ -48,6 +82,9 @@ const mutations = {
         })
         // console.log(articles)
         state.articles = articles
+    },
+    updateSelection (state, payload) {
+        state.selection = payload
     }
 }
 

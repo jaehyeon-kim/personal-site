@@ -2,7 +2,7 @@
     <v-container fluid grid-list-lg>
         <v-layout row wrap>
             <div :class="`${'flex xs10 sm8 md6 ' + (isHidden ? '' : 'offset-xs1')}`">
-                <v-card max-height="250" v-for="(article, i) in articles" :key="i" class="mb-3">
+                <v-card max-height="250" v-for="(article, i) in selected" :key="i" class="mb-3">
                     <v-card-text :style="{ cursor: 'pointer'}">
                         <div @click="openArticle(article)">
                             <span class="headline">{{ article.title }}</span><br>
@@ -70,12 +70,15 @@ export default {
             return 500
         }
     },
-    articles() {
+    articles () {
       return this.$store.getters['blog/articles'].sort((a, b) => {
         if (a.created > b.created) return -1
         if (a.created < b.created) return 1
         return 0
       })
+    },
+    selected () {
+        return this.$store.getters['blog/selected']
     },
     dateToString() {
       return this.$store.getters['blog/dateToString']
