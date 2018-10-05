@@ -21,6 +21,14 @@ import 'prismjs/components/prism-bash'
 import VuePrism from 'vue-prism'
 Vue.use(VuePrism)
 
+import Highcharts from 'highcharts'
+import HighchartsVue from 'highcharts-vue'
+import wordcloud from 'highcharts/modules/wordcloud'
+import exportingInit from 'highcharts/modules/exporting'
+exportingInit(Highcharts)
+wordcloud(Highcharts)
+Vue.use(HighchartsVue)
+
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

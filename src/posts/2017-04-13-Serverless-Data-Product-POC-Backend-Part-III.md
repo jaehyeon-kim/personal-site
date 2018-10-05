@@ -1,7 +1,7 @@
 ---
 title: 'Serverless Data Product POC Frontend Part III'
 category: 'Serverless'
-tags: [Lambda, API Gateway, R]
+tags: [Lambda, API Gateway, R, Python]
 created: '2017-04-13'
 updated:
 status: publish

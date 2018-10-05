@@ -12,6 +12,18 @@ const getters = {
             const options = { year: 'numeric', month: 'long', day: 'numeric' }
             return d.toLocaleDateString('en-US', options)
         }
+    },
+    tagsFreq (state) {
+        let tags = []
+        let freq = []
+        state.articles.map(x => x.tags).forEach(x => {
+            tags = tags.concat(x)
+        })
+        let uniqueTags = [...new Set(tags)]
+        uniqueTags.forEach(u => {
+            freq.push({ name: u, weight: tags.filter(t => t === u).length })
+        })
+        return freq
     }
 }
 

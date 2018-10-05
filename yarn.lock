@@ -2555,6 +2555,14 @@ he@1.1.x, he@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/he/-/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
 
+highcharts-vue@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/highcharts-vue/-/highcharts-vue-1.2.0.tgz#13ec436eae14fb1ec361033fce9ca66f0a9fbb12"
+
+highcharts@^6.1.4:
+  version "6.1.4"
+  resolved "https://registry.yarnpkg.com/highcharts/-/highcharts-6.1.4.tgz#753b6d4b99a279ade28276e1b4dc5a53346c7601"
+
 highlight.js@^9.12.0:
   version "9.12.0"
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.12.0.tgz#e6d9dbe57cbefe60751f02af336195870c90c01e"

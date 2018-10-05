@@ -39,10 +39,9 @@
                         </v-card>
                     </v-flex>
                     <v-flex>
-                        <v-card height="200">
-                            Second Card
-                            {{ windowWidth}}
-                        </v-card>
+                        <!-- <v-card height="400"> -->
+                            <app-tags-cloud></app-tags-cloud>
+                        <!-- </v-card> -->
                     </v-flex>
                 </v-layout>
 			</div>
@@ -51,8 +50,10 @@
 </template>
 
 <script>
-// https://codepen.io/developerplus/pen/mBbjBq
-// https://www.thepolyglotdeveloper.com/blog/
+//height="400" width="530">
+// https://codepen.io/developerplus/pen/mBbjBq | https://www.thepolyglotdeveloper.com/blog/
+import TagsCloud from '@/components/blog/TagsCloud'
+
 export default {
   name: 'Blog',
   props: ['slug'],
@@ -95,6 +96,9 @@ export default {
     openArticle(article) {
         this.$router.push({ path: `/blog/${ article.slug }` })
     }
+  },
+  components: {
+      appTagsCloud: TagsCloud
   },
   mounted() {
     this.$nextTick(function() {
