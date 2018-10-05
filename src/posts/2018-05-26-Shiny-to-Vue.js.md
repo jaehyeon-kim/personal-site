@@ -13,7 +13,7 @@ Although Javascript helps develop a more performant web app, for a Shiny develop
 Javascript frameworks ([Angular](https://angularjs.org/), [React](https://reactjs.org/) and [Vue](https://vuejs.org/)) support such key features effectively. Also they help avoid those development issues, together with the recent [Javascript standard](https://www.quora.com/What-is-ES6). In this post, it'll be demonstrated how to render htmlwidgets in a Vue application as well as replacing *htmlwidgets* with native JavaScript libraries.
 
 ## What is Vue?
-<br>
+
 According to the [project website](https://vuejs.org/v2/guide/),
 
 >  Vue (pronounced /vjuː/, like view) is a *progressive framework for building user interfaces*. Unlike other monolithic frameworks, Vue is designed from the ground up to be incrementally adoptable. The core library is focused on the view layer only, and is easy to pick up and integrate with other libraries or existing projects. On the other hand, Vue is also perfectly capable of powering sophisticated *Single-Page Applications* when used in combination with [modern tooling](https://vuejs.org/v2/guide/single-file-components.html) and [supporting libraries](https://github.com/vuejs/awesome-vue#components--libraries).
@@ -37,9 +37,8 @@ And even more
 *Vue* is taken here among the popular Javascript frameworks because it is *simpler to get jobs done and easier to learn*. See [this article](https://belitsoft.com/front-end-development-services/react-vs-angular) for a quick comparison.
 
 ## Building Vue Apps
-<br>
 ### Vue Setup
-<br>
+
 Prerequisites of building a vue app are
 
 * [_Node.js_](https://nodejs.org/en/)
@@ -58,8 +57,8 @@ Prerequisites of building a vue app are
     + fast, reliable and secure dependency management tool
     + used instead of _npm_
     + install globally - `npm install -g yarn`
-
 <br>
+
 The apps can be found in _vue-htmlwidgets_ and _vue-native_ folders of this [GitHub repo](https://github.com/jaehyeon-kim/more-thoughts-on-shiny). They are built with [webpack](https://webpack.js.org/) and can be started as following.
 
 ```bash
@@ -69,17 +68,15 @@ yarn install
 npm run dev
 ```
 ### Libraries for the Apps
-<br>
 #### Common libraries
-<br>
+
 * _User Interface_
     + [_Vuetify_](https://vuetifyjs.com/en/) - Although [Bootstrap](https://getbootstrap.com/docs/3.3/javascript/) is popular for user interface, I find most UI libraries that rely on *Bootstrap* also depend on *JQuery*. And it is possible the *JQuery* for *htmlwidgets* is incompatible with those for the UI libraries. Therefore _Vuetify_ is used instead, which is inspired by [Material Design](https://material.io/design/).
 * _HTTP request_
     + [_axios_](https://github.com/axios/axios) - Promise based HTTP client for the browser and node.js
+<br>
 
-<br>
 #### For _vue-native_
-<br>
 * _state management_
     + [_Vuex_](https://vuex.vuejs.org/) - _Vuex_ is a state management pattern + library for Vue.js applications. It serves as a centralized store for all the components in an application, with rules ensuring that the state can only be mutated in a predictable fashion.
 * _data table_
@@ -91,12 +88,10 @@ npm run dev
 + _highcharts_
     + _highcharts_ - official library
     + _highcharts-vue_ - _highcharts_ as vue components
+<br>
 
-<br>
 ### Render Htmlwidgets
-<br>
 #### index.html
-<br>
 The entry point of the app is _index.html_ and _htmlwidgets_ dependencies need to be included in _head_ followed by material fonts and icons. 3 components are created in `src/components` - _DataTable.vue_, _Highchart.vue_ and _Plotly.vue_. These components are bundled into _build.js_ and sourced by the app.
 
 ```html
@@ -139,7 +134,6 @@ The entry point of the app is _index.html_ and _htmlwidgets_ dependencies need t
 ```
 
 #### Components
-<br>
 The widgets are constructed as [single file components](https://vuejs.org/v2/guide/single-file-components.html). 
 The button (_update table_) listens on a button click event and it'll trigger `update()` defined in the _script_ of the component. Note **v-html** directive. This directive allows to render raw HTML. 
 
@@ -224,7 +218,6 @@ export default {
 ```
 
 #### Layout
-<br>
 The application layout is setup in `./src/App.vue` where the individual components are imported into content.
 
 ```html
@@ -268,7 +261,6 @@ The screen shot of the app is shown below.
 If an app doesn't rely on *htmlwidgets*, it only requires data to create charts and tables. The API has `/hdata` resource to return the iris data. Here the scenario is the iris data will be pulled at the beginning and 10 records are selected randomly when a user clicks a button, resulting in updating components. Note one of the key benefits of this structure is that components can communicate with each other - see what [crosstalk](https://rstudio.github.io/crosstalk/) is aimed for.
 
 #### index.html
-<br>
 The entry point of the app becomes quite simple without *htmlwidgets* dependency.
 
 ```html
@@ -290,7 +282,6 @@ The entry point of the app becomes quite simple without *htmlwidgets* dependency
 ```
 
 #### State Management
-<br>
 Normally a *Vue* app has multiple components so that it is important to keep changes in sync across components. Although *Vue* supports *custom events* and *event bus*, I find state management with [*Vuex*](https://vuex.vuejs.org/) is more straightforward (and better for larger apps).
 
 In the **store** (`./src/store.js`), there are 3 **state** properties.
@@ -365,7 +356,6 @@ export default new Vuex.Store({
 ```
 
 #### Components
-<br>
 Here the source looks quite different from the *DT* object because it's created by the built-in data table component of *Vuetify* - the other 2 compoents look rather similar. The headers of the table is predefined as *data* property while the records (*visData*) are obtained from the store - it keeps in sync as a [computed property](https://v1.vuejs.org/guide/computed.html).
 
 ```html
@@ -412,7 +402,6 @@ export default {
 ```
 
 #### Layout
-<br>
 Instead of requesting individual *htmlwidgets* objects, charts/table are created by individual components. Also the components are updated by clicking the button. The conditional directives (*v-if* and *v-else*) controls which to render depending on the value of *isLoading*.
 
 ```html

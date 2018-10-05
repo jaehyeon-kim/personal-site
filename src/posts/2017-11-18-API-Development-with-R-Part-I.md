@@ -18,7 +18,8 @@ The _plumber_ package is the easiest way of exposing an R function via API and i
 Here a simple function named _test_ is defined in _plumber-src.R_. `test()` returns a number after waiting the amount of seconds specified by _wait_. Note the details of HTTP methods and resource paths can be specified as the way how a function is documented. By default, the response is converted into a json string and it is set to be [unboxed](https://www.rplumber.io/docs/rendering-and-output.html#boxed-vs-unboxed-json).
 
 
-{% highlight r %}
+```r
+
 #' Test function
 #' @serializer unboxedJSON
 #' @get /test
@@ -27,16 +28,16 @@ test <- function(n, wait = 0.5, ...) {
     Sys.sleep(wait)
     list(value = n)
 }
-{% endhighlight %}
+```
 
 The function can be served as shown below. Port 9000 is set for the _plumber_ API.
 
+```r
 
-{% highlight r %}
 library(plumber)
 r <- plumb("path-to-plumber-src.R")
 r$run(port=9000, host="0.0.0.0")
-{% endhighlight %}
+```
 
 ## Rserve
 
@@ -54,22 +55,22 @@ I find the _FastRWeb_ package is not convenient for API development for several 
 
 `test()` is the same to the _plumber_ API.
 
+```r
 
-{% highlight r %}
 #### HTTP RESOURCES
 test <- function(n, wait = 0.5, ...) {
     Sys.sleep(wait)
     list(value = n)
 }
-{% endhighlight %}
+```
 
 In order to use the built-in server, a function named _.http.request_ should be found. Here another function named *process_request* is created and it is used instead of `.http.request()` defined in the _FastRWeb_ package. `process_request()` is basically divided into 2 parts: _builing request object_ and _building output object_.
 
 * building request object - the request obeject is built so that the headers are parsed so as to identify the request method. Then the request parameters are parsed according to the request method and content type. 
 * building output object - the output object is a list of _payload_, _content-type_, _headers_ and _status-code_. A function can be found by the request URL and it is checked if all function arguments are found in the request parameters. Then _payload_ is obtained by executing the matching function if all arguments are found. Otherwise the _400 (Bad Request) error_ will be returned.
 
+```r
 
-{% highlight r %}
 #### PROCESS REQUEST
 process_request <- function(url, query, body, headers) {   
     #### building request object
@@ -167,15 +168,16 @@ parse_headers <- function(headers) {
         return (NULL)
     }
 }
-{% endhighlight %}
+```
 
 `process_request()` replaces `.http.request()` in the source script of Rserve - it'll be explained futher in Part II. 
 
 
-{% highlight r %}
+```r
+
 ## Rserve requires .http.request function for handling HTTP request
 .http.request <- process_request
-{% endhighlight %}
+```
 
 ## rApache
 
@@ -186,7 +188,8 @@ _rApache_ provides multiple ways to specify an R function that handles incoming 
 Here is the test function as a Rook application. As `process_request()`, it parses function arguments according to the request method and content type. Then a value is returned after wating the specified seconds. The response of a Rook application is a list of _status_, _headers_ and _body_.
 
 
-{% highlight r %}
+```r
+
 test <- function(env) {
     req <- Request$new(env)
     res <- Response$new()
@@ -227,9 +230,9 @@ test <- function(env) {
         )
     }
 }
-{% endhighlight %}
+```
 
-This is all for Part I. In [Part II](/2017/11/API-Development-with-R-Part-II), it'll be discussed how to deploy the APIs via a Docker container, how to make example requests and their performance. I hope this article is interesting.
+This is all for Part I. In [Part II](/blog/2017-11-19-API-Development-with-R-Part-II), it'll be discussed how to deploy the APIs via a Docker container, how to make example requests and their performance. I hope this article is interesting.
 
 
 

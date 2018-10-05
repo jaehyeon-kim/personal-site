@@ -15,17 +15,17 @@ A developer can be relieved from the overwhelming DevOps stuff if his/her model 
 This is the first post of *Serverless Data Product POC* series and I'm planning to introduce a data product in a **serverless** environment. For the backend, a simple logistic regression model is packaged and tested for [AWS Lambda](https://aws.amazon.com/lambda/) - R is not included in [Lambda runtime](http://docs.aws.amazon.com/lambda/latest/dg/current-supported-versions.html) so that it is packaged and run via the Python [rpy2](https://pypi.python.org/pypi/rpy2) package. Then the model is deployed at [AWS Lambda](https://aws.amazon.com/lambda/) and the Lambda function is exposed via [Amazon API Gateway](https://aws.amazon.com/api-gateway/). For the frontend, a simple single page application is served from [Amazon S3](https://aws.amazon.com/s3/).
 
 * Backend
-    * [Packaging R for AWS Lambda](#) - this post
-    * [Deploying at AWS Lambda](/2017/04/Serverless-Data-Product-POC-Backend-Part-II.html)
-    * [Exposing via Amazon API Gateway](/2017/04/Serverless-Data-Product-POC-Backend-Part-III.html)
+    * [Packaging R for AWS Lambda - Part I](#) - this post
+    * [Deploying at AWS Lambda - Part II](/blog/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II)
+    * [Exposing via Amazon API Gateway - Part III](/blog/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III)
 * Frontend
-    * [Serving a single page application from Amazon S3](/2017/04/Serverless-Data-Product-POC-Frontend-Part-IV.html)
+    * [Serving a single page application from Amazon S3 - Part IV](/blog/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV)
 
 <hr/>
 <br/>
 [**EDIT 2017-04-11**] Deploying at AWS Lambda and exposing via API Gateway are split into 2 posts (Part II and III).
 
-[**EDIT 2017-04-17**] The Lambda function hander (*handler.py*) has been modified to resolve an issue of *Cross-Origin Resource Sharing (CORS)*. See [Part IV](/2017/04/Serverless-Data-Product-POC-Frontend-Part-IV.html) for further details.
+[**EDIT 2017-04-17**] The Lambda function hander (*handler.py*) has been modified to resolve an issue of *Cross-Origin Resource Sharing (CORS)*. See [Part IV](/blog/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV) for further details.
 <hr/>
 
 ## Model
@@ -33,15 +33,15 @@ This is the first post of *Serverless Data Product POC* series and I'm planning 
 The data is from the [LOGIT REGRESSION - R DATA ANALYSIS EXAMPLES](http://stats.idre.ucla.edu/r/dae/logit-regression/) of UCLA: Statistical Consulting Group. It is hypothetical data about graduate school admission and has 3 featues (_gre_, _gpa_, _rank_) and 1 binary response (_admit_).
 
 
-{% highlight r %}
+```r
+
 data <- read.csv("http://www.ats.ucla.edu/stat/data/binary.csv")
 data$rank <- as.factor(data$rank)
 summary(data)
-{% endhighlight %}
+```
 
+```bash
 
-
-{% highlight text %}
 ##      admit             gre             gpa        rank   
 ##  Min.   :0.0000   Min.   :220.0   Min.   :2.260   1: 61  
 ##  1st Qu.:0.0000   1st Qu.:520.0   1st Qu.:3.130   2:151  
@@ -49,15 +49,16 @@ summary(data)
 ##  Mean   :0.3175   Mean   :587.7   Mean   :3.390   4: 67  
 ##  3rd Qu.:1.0000   3rd Qu.:660.0   3rd Qu.:3.670          
 ##  Max.   :1.0000   Max.   :800.0   Max.   :4.000
-{% endhighlight %}
+```
 
 GLM is fit to the data and the fitted object is saved as _admission.rds_. The choice of logistic regression is because it is included in the *stats* package, which is one of the default packages, and I'd like to have R as small as possible for this POC application. Note that AWS Lambda has limits in deployment package size (50MB compressed) so that it is important to keep a deployment package small - see [AWS Lambda Limits](http://docs.aws.amazon.com/lambda/latest/dg/limits.html) for further details. Then the saved file is uploaded to S3 to a bucket named *serverless-poc-models* - the Lambda function handler will use this object for prediction as described in the next section.
 
 
-{% highlight r %}
+```r
+
 fit <- glm(admit ~ ., data = data, family = "binomial")
 saveRDS(fit, "admission.rds")
-{% endhighlight %}
+```
 
 Note that, if data is transformed for better performance, a model object alone may not be sufficient as transformed records are necessary as well. A way to handle this situation is using the [caret package](https://topepo.github.io/caret/index.html). The package has `preProcess()` and associating `predict()` so that a separate object can be created to transform records for prediction - see [this page](https://topepo.github.io/caret/pre-processing.html#the-preprocess-function) for further details.
 
@@ -78,7 +79,8 @@ This and the next sections are based on the following posts with necessary modif
 As can be seen in the next section, the shared libraries are saved in `LAMBDA_TASK_ROOT/lib` so that they are loaded appropriately.
 
 
-{% highlight python %}
+```python
+
 import ctypes
 import json
 import os
@@ -109,7 +111,7 @@ import rpy2
 from rpy2 import robjects
 from rpy2.robjects import r
 ################## end of loading R
-{% endhighlight %}
+```
 
 Then 3 functions are defined as following.
 
@@ -118,7 +120,8 @@ Then 3 functions are defined as following.
 * `pred_admit` - Given gre, gpa and rank, it returns _True_ or _False_ depending on the predicted probablity
 
 
-{% highlight python %}
+```python
+
 BUCKET = 'serverless-poc-models'
 KEY = 'admission.rds'
 s3 = boto3.client('s3')
@@ -156,12 +159,13 @@ def pred_admit(gre, gpa, rnk, bucket=BUCKET, key=KEY):
     r('newdata <- data.frame(gre=as.numeric(gre),gpa=as.numeric(gpa),rank=rank)')
     r('pred <- predict(fit, newdata=newdata, type="response")')    
     return robjects.r('pred')[0] > 0.5
-{% endhighlight %}
+```
 
 This is the Lambda function handler for this POC application. It returns a prediction result if there is no error. 400 HTTP error will be returned if there is an error.
 
 
-{% highlight python %}
+```python
+
 def lambda_handler(event, context):
     try:
         gre = event["gre"]
@@ -180,12 +184,13 @@ def lambda_handler(event, context):
             'message': e.message.replace('\n', ' ')
             }
         raise Exception(json.dumps(err))
-{% endhighlight %}
+```
 
 Optionally code of the test handler is shown below.
 
 
-{% highlight python %}
+```python
+
 import unittest
 import handler
 
@@ -199,7 +204,7 @@ class AdmitHandlerTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-{% endhighlight %}
+```
 
 ## Packaging
 
@@ -210,7 +215,8 @@ According to [Lambda Execution Environment and Available Libraries](http://docs.
 In this step, R and necessary libraries are installed followed by cloning the project repository. The package folder is created as `$HOME/$HANDLER` (i.e. `/home/ec2-user/handler`). The subfolder `$HOME/$HANDLER/library` is to copy necessary R default packages separately - remind that I'd like to have R as small as possible.
 
 
-{% highlight bash %}
+```bash
+
 sudo yum -y update
 sudo yum -y upgrade
 
@@ -225,7 +231,7 @@ git clone https://github.com/jaehyeon-kim/serverless-poc.git
 # note R packages will be copied to $HOME/$HANDLER/library separately
 export HANDLER=handler
 mkdir -p $HOME/$HANDLER/library
-{% endhighlight %}
+```
 
 ### Copy R and shared libraries
 
@@ -242,7 +248,8 @@ In relation to C shared libraries, the default installation includes 4 libraries
 Together with the above 5 shared libraries, the following 3 libraries are added: libgomp.so.1, libgfortran.so.3 and libquadmath.so.0. Further investigation is necessary to what extent these are used. Note that the above posts inclue 2 libraries for linear algebra (libblas.so.3 and liblapack.so.3) but they are not added as equivalent libraries seem to exist - I guess they are necessary if R is build from source with the following options: *--with-blas* and *--with-lapack*. A total of 8 C shared libraries are added to the deployment package.
 
 
-{% highlight bash %}
+```bash
+
 # copy R except for packages - minimum R packages are copied separately
 ls /usr/lib64/R | grep -v library | xargs -I '{}' cp -vr /usr/lib64/R/'{}' $HOME/$HANDLER/
 
@@ -256,14 +263,15 @@ ls /usr/lib64/R/library | grep 'stats$\|graphics\|grDevices\|utils\|datasets\|me
 ldd /usr/lib64/R/bin/exec/R | grep "=> /" | awk '{print $3}' | \
 	grep 'libgomp.so.1\|libgfortran.so.3\|libquadmath.so.0\|libtre.so.5' | \
 	xargs -I '{}' cp -v '{}' $HOME/$HANDLER/lib/
-{% endhighlight %}
+```
 
 ### Install rpy2 and copy to Lamdba package folder
 
 Python virtualenv is used to install the rpy2 package. The idea is straightforward but actually it was a bit tricky as the rpy2 and its dependent packages can be found in either *site-packages* or *dist-packages* folder even in a single EC2 instance - the [AWS Doc](http://docs.aws.amazon.com/lambda/latest/dg/lambda-python-how-to-create-deployment-package.html) doesn't explain clearly. `pip install rpy2 -t folder-path` was tricky as well because the rpy2 package was not installed sometimes while its dependent packages were installed. One way to check is executing `pip list` in the virtualenv and, if the rpy2 package is not shown, it is in *dist-packages*.
 
 
-{% highlight bash %}
+```bash
+
 virtualenv ~/env && source ~/env/bin/activate
 pip install rpy2
 # either in site-packages or dist-packages
@@ -273,14 +281,15 @@ cp -vr $VIRTUAL_ENV/lib64/python2.7/$PY_PACK/rpy2* $HOME/$HANDLER
 cp -vr $VIRTUAL_ENV/lib/python2.7/$PY_PACK/singledispatch* $HOME/$HANDLER
 cp -vr $VIRTUAL_ENV/lib/python2.7/$PY_PACK/six* $HOME/$HANDLER
 deactivate
-{% endhighlight %}
+```
 
 ### Copy handler.py/test_handler.py, compress and copy to S3 bucket
 
 *handler.py* and *test_handler.py* are copied to the Lambda package folder and all contents in the folder are compressed. Note that *handler.py* should exist in the root of the compressed file so that it is necessary to run *zip* in the deployment package folder. The size of *admission.zip* is about 27MB so that it is good to deploy. Finally the package file is copied to a S3 bucket called *serverless-poc-handlers* - note that the [aws cli should be configured](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) to copy the file to S3.
 
 
-{% highlight bash %}
+```bash
+
 cp -v serverless-poc/poc-logit-handler/*.py $HOME/$HANDLER
 
 cd $HOME/$HANDLER
@@ -290,15 +299,16 @@ zip -r9 $HOME/admission.zip *
 
 # aws s3 mb s3://serverless-poc-handlers # create bucket
 aws s3 cp $HOME/admission.zip s3://serverless-poc-handlers
-{% endhighlight %}
+```
 
 ## Testing
 
 For testing, an EC2 instance without R is necessary so that testing is made in a separate t2.micro instance from the same AMI. Configure the aws-cli and install the boto3 package - the boto3 package is avaialble in Lambda execution environment so that it doesn't need to be added to the deployment package. *LD_LIBRARY_PATH* is an environment variable that points to the C shared libraries of the Lambda package. After downloading the package and decompressing it, testing can be made by running *test_handler.py*.
 
 
-{% highlight bash %}
-# configure aws-cli if necessar
+```bash
+
+# configure aws-cli if necessary
 
 sudo pip install boto3
 export R_HOME=$HOME
@@ -322,7 +332,7 @@ DEBUG:root:admission.rds already downloaded
 Ran 1 test in 0.024s
 
 OK
-{% endhighlight %}
+```
 
 
 This is all that I've prepared for this post and I hope you don't feel bored. The next posts will be much more interesting as this package will be exposed via an API.

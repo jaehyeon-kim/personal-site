@@ -8,20 +8,20 @@ status: publish
 description: 'In the previous post, serverless event-driven application development is introduced. Also how to package R, necessary libraries/packages and a Lambda function handler is discussed. No need of provising/managing servers is one of the key benefits of the architecture. It is also a cost-effective way of delivering a data product as functions are executed on-demand rather than in servers that run 24/7. Furthermore AWS Lambda free tier includes 1M free requests per month and 400,000 GB-seconds of compute time per month, which is available to both existing and new AWS customers indefinitely. (GB-seconds is applicable when execution is made with 1 GB of memory.) Lowering the size of memory increases the execution time and thus 3.2M seconds or about 37 days are free with 128 MB of memory (1 GB divided by 8) - note that CPU power is proportional to allocated memory.'
 ---
 
-In the [previous post](/2017/04/Serverless-Data-Product-POC-Backend-Part-I.html), **serverless** **event-driven** application development is introduced. Also how to package R, necessary libraries/packages and a Lambda function handler is discussed. No need of provising/managing servers is one of the key benefits of the architecture. It is also a cost-effective way of delivering a data product as functions are executed *on-demand* rather than in servers that run 24/7. Furthermore [AWS Lambda free tier](https://aws.amazon.com/lambda/pricing/) includes 1M free requests per month and 400,000 GB-seconds of compute time per month, which is available to both existing and new AWS customers indefinitely. (GB-seconds is applicable when execution is made with 1 GB of memory.) Lowering the size of memory increases the execution time and thus 3.2M seconds or about 37 days are free with 128 MB of memory (1 GB divided by 8) - note that CPU power is proportional to allocated memory.
+In the [previous post](/blog/2017-04-08-Serverless-Data-Product-POC-Backend-Part-I), **serverless** **event-driven** application development is introduced. Also how to package R, necessary libraries/packages and a Lambda function handler is discussed. No need of provising/managing servers is one of the key benefits of the architecture. It is also a cost-effective way of delivering a data product as functions are executed *on-demand* rather than in servers that run 24/7. Furthermore [AWS Lambda free tier](https://aws.amazon.com/lambda/pricing/) includes 1M free requests per month and 400,000 GB-seconds of compute time per month, which is available to both existing and new AWS customers indefinitely. (GB-seconds is applicable when execution is made with 1 GB of memory.) Lowering the size of memory increases the execution time and thus 3.2M seconds or about 37 days are free with 128 MB of memory (1 GB divided by 8) - note that CPU power is proportional to allocated memory.
 
 Initially I was planning to discuss how to deploy a package at AWS Lambda and to expose it via Amazon API Gateway in this post. However it'd be too long with so many screen shots and I split them in Part II and III. Here is an updated series plan.
 
 * Backend
-    * [Packaging R for AWS Lambda](/2017/04/Serverless-Data-Product-POC-Backend-Part-I.html)
-    * [Deploying at AWS Lambda](#) - this post
-    * [Exposing via Amazon API Gateway](/2017/04/Serverless-Data-Product-POC-Backend-Part-III.html)
+    * [Packaging R for AWS Lambda - Part I](/blog/2017-04-08-Serverless-Data-Product-POC-Backend-Part-I)
+    * [Deploying at AWS Lambda - Part II](#) - this post
+    * [Exposing via Amazon API Gateway - Part III](/blog/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III)
 * Frontend
-    * [Serving a single page application from Amazon S3](/2017/04/Serverless-Data-Product-POC-Frontend-Part-IV.html)
+    * [Serving a single page application from Amazon S3 - Part IV](/blog/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV)
 
 <hr/>
 <br/>
-[**EDIT 2017-04-17**] The Lambda function hander (*handler.py*) has been modified to resolve an issue of *Cross-Origin Resource Sharing (CORS)*. See [Part IV](/2017/04/Serverless-Data-Product-POC-Frontend-Part-IV.html) for further details.
+[**EDIT 2017-04-17**] The Lambda function hander (*handler.py*) has been modified to resolve an issue of *Cross-Origin Resource Sharing (CORS)*. See [Part IV](/blog/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV) for further details.
 <hr/>
 
 ## Managing security
@@ -32,16 +32,17 @@ Before deploying a Lambda package, it is necessary to understand the security fr
 * AmazonAPIGatewayAdministrator
 * AmazonCognitoPowerUser
 
+<br>
 These policies define permissions to relevant AWS services such as Amazon S3, Amazon CloudWatch, AWS Lambda and Amazon API Gateway - note that they are *user-based policies*. The attached policies can be found in the *Users* section of IAM.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/PM-user.png)
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/PM-user.png)
 
 Unlike users (and groups that can have one or more users with relevant permissions), AWS services (eg AWS Lambda) can assume a *role*, inheriting the permissions given to the role. Roles don't have permanent credentials assigned to them but, when a service assumes a role, temporary credentials are assigned and they are used to authorize the service to do what's defined in the (user-defined) policies attached to the role. Note that temporary credentials are made up of *Access Key ID*, *Secret Access Key* and *Security Token* and are generated by [AWS Security Token Service (STS)](http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html). In order to assume a role, a service needs another type of policy called *trust policy*, which defines who can assume a role. Therefore we need both types of policy so as to deploy the POC application at AWS Lambda.
 
 * User-based policy - to give permissions to AWS services
 * Trust policy - to assume a role
 
+<br>
 Note that this section is based on the Ch4 of [AWS Lambda in Action](https://www.manning.com/books/aws-lambda-in-action) and I find this book is quite a good material to learn AWS Lambda.
 
 ## Creating role and policy
@@ -53,10 +54,12 @@ Before creating a role, it is necessary to create (user-based) policies so that 
 * Resource - On which resources?
 * Principal - Who is allowed or denied access to a resource? (relevant to trust policies)
 
+<br>
 *ServerlessPOC* is read-only permission to all keys in the *serverless-poc-models* bucket while *AWSLambdaBasicExecutionRole* is write permission to all resources in Amazon CloudWatch.
 
 
-{% highlight bash %}
+```js
+
 //ServerlessPOC
 {
     "Version": "2012-10-17",
@@ -88,21 +91,15 @@ Before creating a role, it is necessary to create (user-based) policies so that 
         }
     ]
 }
-{% endhighlight %}
-
-<br/>
+```
 
 Only *ServerlessPOC* needs to be created and it is created in AWS Console. In the *Policies* section of IAM, the last option (*Create Your Own Policy*) is selected as it is quite a simple policy.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/P01-create.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/P01-create.png)
 
 Then the name, description and policy document is completed - it is possible to validate the policy document by clicking the *Validate Policy* button.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/P03-review.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/P03-review.png)
 
 Now it is ready to create a role for the Lambda function while attaching the policies described above. A role can be created in the *Roles* section of IAM.
 
@@ -116,24 +113,21 @@ Now it is ready to create a role for the Lambda function while attaching the pol
 
 This is simply setting the name of the role.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/R01-name.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/R01-name.png)
 
 #### Step 2 : Select Role Type
 
 *AWS Lambda* is selected in the *AWS Service Roles* group.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/R02-type.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/R02-type.png)
 
 #### Step 3 : Establish Trust
 
 This step passes automatically while the following *trust policy* is created, which allows to assume a role for AWS Lambda.
 
 
-{% highlight bash %}
+```js
+
 // Trust Relationship
 {
   "Version": "2012-10-17",
@@ -147,29 +141,23 @@ This step passes automatically while the following *trust policy* is created, wh
     }
   ]
 }
-{% endhighlight %}
+```
 
 #### Step 4 : Attach Policy
 
 Here *ServerlessPOC* and *AWSLambdaBasicExecutionRole* are attached to the role - it is possible to select multiple policies by checking tick boxes.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/R04-attach.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/R04-attach.png)
 
 #### Step 5 : Review
 
 After reviewing, it is possible to create the role.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/R05-review.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/R05-review.png)
 
 Now the role (*ServerlessPOC*) can be seen in the *Roles* section of IAM. The user-based and trust policies are found in the *Permissions* and *Trust Relationships* tabs respectively.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/PM-role.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/PM-role.png)
 
 ## Deployment
 
@@ -182,17 +170,13 @@ Now the role (*ServerlessPOC*) can be seen in the *Roles* section of IAM. The us
 
 Blueprints are sample configurations of event sources and Lambda functions. *Blank Function* is selected for the Lambda function of the POC application.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/L01-blueprint.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/L01-blueprint.png)
 
 #### Configure triggers
 
 A Lambda function can be triggered by another AWS service and clicking the dashed box populates available services. No trigger is selected for the Lambda function of the POC application. Note that triggering a Lambda function by changes in another service is useful because an application can be structured in an *event-driven* way and there is no need to control everything in a big program/script.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/L02-trigger.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/L02-trigger.png)
 
 #### Configure function
 
@@ -204,10 +188,7 @@ Now it is time to configure the function. The function's name (*ServerlessPOCAdm
 
 As the deployment package (*admission.zip*) is copied to S3 already, the last option is selected and its S3 link URL is filled in.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/L03-configure-01.png)
-<hr style="height:1px;border:none;color:#333;background-color:#333;" />
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/L03-configure-01.png)
 
 The value of handler is set as *handler.lambda_handler* as the Lambda function handler is in *handler.py* and named as *lambda_handler*. Then the role named *ServerlessPOC* is chosen after selecting the value of role to be *Choose an existing role* among the options listed below.
 
@@ -217,17 +198,11 @@ The value of handler is set as *handler.lambda_handler* as the Lambda function h
 
 For memory and timeout, 128 MB and 6 seconds are chosen respectively. Note that they can be modified and the timeout is set back to the default 3 seconds while testing.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/L03-configure-02.png)
-<hr style="height:1px;border:none;color:#333;background-color:#333;" />
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/L03-configure-02.png)
 
 The remaining settings are left as they are. 
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/L03-configure-03.png)
-<hr style="height:1px;border:none;color:#333;background-color:#333;" />
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/L03-configure-03.png)
 
 After clicking the *Next* button, it is possible to review and create the function.
 
@@ -237,24 +212,21 @@ After clicking the *Next* button, it is possible to review and create the functi
 
 Testing a Lambda function can be done on the Console. When clicking the *Test* button, an editor pops up and it is possible to enter an event. For the Lambda function, *gre*, *gpa* and *rank* are set to be "800", "4" and "1" respectively. Testing can be done by clicking the *Save and Test* button at the bottom - not shown in the screen shot.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/L04-save-and-test-01.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/L04-save-and-test-01.png)
 
 The testing output includes *Execution result*, *Summary* and *Log output*. With the event values specified earlier, it returns *true*. Note that the Python dictionary output of the hander function is coverted to JSON. Also an event specified as JSON is automatically converted to Python dictionary. 
 
 As shown in the summary, it took 658.93 ms to complete. If testing is made multiple times without delay, the duration decreases quite significantly to less than 200 ms thanks to [container reuse in AWS Lambda](https://aws.amazon.com/blogs/compute/container-reuse-in-lambda/) - recall that the model object is not downloaded if it exists in `/tmp`. If latency is an issue, it is possible to call the function in every, let say, 5 minutes. As mentioned eariler, a Lambda function can be triggered by another AWS service and, if an Amazon CloudWatch event is set, the function call can be scheduled.
 
-{:.center}
-![](/figs/Serverless-Data-Product-POC-Backend/L04-save-and-test-02.png)
-<br/>
+![](/static/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II/L04-save-and-test-02.png)
 
 #### Invoke API
 
 AWS Lambda provides the invoke API so that a Lambda function can be called programmatically as shown below.
 
 
-{% highlight bash %}
+```bash
+
 $ aws lambda invoke --function-name ServerlessPOCAdmission \
     --payload '{"gre":"800", "gpa":"4", "rank":"1"}' output.txt
 {
@@ -263,6 +235,6 @@ $ aws lambda invoke --function-name ServerlessPOCAdmission \
 
 $ cat output.txt | grep result
 {"result": true}
-{% endhighlight %}
+```
 
 This is all for the part II. The POC application is successfully deployed at AWS Lambda and now it is ready to expose it via Amazon API Gateway. This will be discussed in the next post. I hope you enjoy reading this post.

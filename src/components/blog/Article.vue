@@ -70,6 +70,11 @@ pre > code {
   word-wrap: normal;
 }
 
+h2, h3, h4 {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 img {
     width:600px;
     display: block;

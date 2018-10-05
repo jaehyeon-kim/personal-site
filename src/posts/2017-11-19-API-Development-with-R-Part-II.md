@@ -7,7 +7,7 @@ updated:
 status: publish
 description: 'In Part I, it is discussed how to serve an R function with plumber, Rserve and rApache. In this post, the APIs are deployed in a Docker container and, after showing example requests, their performance is compared. The rocker/r-ver:3.4 is used as the base image and each of the APIs is added to it. For simplicity, the APIs are served by Supervisor. For performance testing, Locust is used.'
 ---
-In [Part I](/2017/11/API-Development-with-R-Part-I), it is discussed how to serve an R function with _plumber_, _Rserve_ and _rApache_. In this post, the APIs are deployed in a Docker container and, after showing example requests, their performance is compared. The [rocker/r-ver:3.4](https://hub.docker.com/r/rocker/r-ver/) is used as the base image and each of the APIs is added to it. For simplicity, the APIs are served by [Supervisor](http://supervisord.org/). For performance testing, [Locust](https://locust.io/) is used. The source of this post can be found in this [GitHub repo](https://github.com/jaehyeon-kim/r-api-demo).
+In [Part I](/blog/2017-11-18-API-Development-with-R-Part-I), it is discussed how to serve an R function with _plumber_, _Rserve_ and _rApache_. In this post, the APIs are deployed in a Docker container and, after showing example requests, their performance is compared. The [rocker/r-ver:3.4](https://hub.docker.com/r/rocker/r-ver/) is used as the base image and each of the APIs is added to it. For simplicity, the APIs are served by [Supervisor](http://supervisord.org/). For performance testing, [Locust](https://locust.io/) is used. The source of this post can be found in this [GitHub repo](https://github.com/jaehyeon-kim/r-api-demo).
 
 ## Deployment
 
@@ -70,7 +70,7 @@ CMD ["/usr/bin/supervisord", "-c", "/home/docker/api-supervisor.conf"]
 
 ### Plumber
 
-As can be seen in [api-supervisor.conf](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/api-supervisor.conf), the _plumber_ API can be started at _port 9000_ as following. ([plumber-src.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/plumber/plumber-src.R) and [plumber-serve.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/plumber/plumber-serve.R) are discussed in [Part I](/2017/11/API-Development-with-R-Part-I))
+As can be seen in [api-supervisor.conf](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/api-supervisor.conf), the _plumber_ API can be started at _port 9000_ as following. ([plumber-src.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/plumber/plumber-src.R) and [plumber-serve.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/plumber/plumber-serve.R) are discussed in [Part I](/blog/2017-11-18-API-Development-with-R-Part-I))
 
 ```bash
 
@@ -89,7 +89,7 @@ auth disable
 daemon disable
 control disable
 ```
-Then it is possible to start the _Rserve_ API at _port 8000_ as shown below. ([rserve-src.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/rserve/rserve-src.R) is discussed in [Part I](/2017/11/API-Development-with-R-Part-I).)
+Then it is possible to start the _Rserve_ API at _port 8000_ as shown below. ([rserve-src.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/rserve/rserve-src.R) is discussed in [Part I](/blog/2017-11-18-API-Development-with-R-Part-I).)
 
 ```bash
 
@@ -110,7 +110,7 @@ LoadModule R_module /usr/lib/apache2/modules/mod_R.so
 </Location>
 ```
 
-It is possible to start the _rApache_ API at _port 80_ as following. ([rapache-app.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/rapache/rapache-app.R) is discussed in [Part I](/2017/11/API-Development-with-R-Part-I).)
+It is possible to start the _rApache_ API at _port 80_ as following. ([rapache-app.R](https://github.com/jaehyeon-kim/r-api-demo/blob/master/api/src/rapache/rapache-app.R) is discussed in [Part I](/blog/2017-11-18-API-Development-with-R-Part-I).)
 
 ```bash
 
@@ -142,8 +142,6 @@ plumber200 <- POST(url = 'http://localhost:9000/test', encode = 'json',
 unlist(c(api = 'plumber', status = status_code(plumber200),
          content = content(plumber200)))
 ```
-
-
 
 ```bash
 
@@ -242,13 +240,11 @@ locust -f ./locustfile.py --host http://localhost:8000 --no-web -c 3 -r 3
 
 When only 1 request is made successively, the average response time of the APIs is around 500ms. When there are multiple concurrent requests, however, the average response time of the _plumber_ API increases significantly. This is because R is single threaded and requests are _queued_ by _httpuv_. On the other hand, the average response time of the _Rserve_ API stays the same and this is because _Rserve_ handles concurrent requests by _forked_ processes. The performance of the _rApache_ API is in the middle. In practice, it is possible to boost the performance of the _rApache_ API by enabling [Prefork Multi-Processing Module](http://rapache.net/manual.html) although it will consume more memory.
 
-{:.center}
-![](/figs/API-Development-with-R/response_time.png)
+![](/static/2017-11-19-API-Development-with-R-Part-II/response_time.png)
 
 As expected, the _Rserve_ API handles considerably many requests per second. 
 
-{:.center}
-![](/figs/API-Development-with-R/req_per_sec.png)
+![](/static/2017-11-19-API-Development-with-R-Part-II/req_per_sec.png)
 
 Note that the test function in this post is a bit unrealistic as it just waits before returning a value. In practice, R functions will consume more CPU and the average response time will tend to increase when multiple requests are made concurrently. Even in this case, the benefit of forking will persist.
 

@@ -11,13 +11,10 @@ A Shiny app is served by one (*single-threaded blocking*) process by [Open Sourc
 In this post, it'll be demonstrated how to implement the async feature of Shiny. Then its limitation will be discussed with an alternative app, which is built by *JavaScript* for the frontend and *RServe* for the backend.
 
 ## Async Shiny and Its Limitation
-<br>
 ### Brief Intro to Promises
-<br>
 A basic idea of how the *promises* package works is that a (long running) process is passed to a forked process while it immediately returns a *promise* object. Then the result can be obtained once it's finished (or failed) by handlers eg) *onFulfilled* and *onRejected*. The package also provides pipe operators (eg `%...>%`) for ease of use. Typically a *promise* object can be created with the [future](https://cran.r-project.org/web/packages/future/index.html) package. See [this page](https://rstudio.github.io/promises/articles/overview.html) for further details.
 
 ### Shiny App
-<br>
 A simple Shiny app is created for demonstration that renders 3 [htmlwidgets](https://www.htmlwidgets.org/): *DT*, *highcharter* and *plotly*. For this, the following *async-compatible* packages are necessary.
 
 * Shiny v1.1+
@@ -128,17 +125,14 @@ A screen shot of the Shiny app is seen below. It is possible to check the async 
 ![](/static/2018-05-19-Async-Shiny-and-Its-Limitation/shiny.png)
 
 ### Limitation
-<br>
 You may notice the htmlwidgets are rendered without delay across browsers but it's not the case in the same browser. This is due to the way how [Shiny's flush cycle](https://rstudio.github.io/promises/articles/shiny.html#the-flush-cycle) is implemented. Simply put, a user (or session) is not affected by other users (or sessions) for their async requests. However the async feature of Shiny is of little help for multiple async requests by a single user because all requests are processed one by one as its sync version.
 
 This limitation can have a significant impact on developing a web application. In general, almost all events/actions are handled through the server in a Shiny app. However the async feature of the server is not the full extent that a typical JavaScript app can bring.
 
 ## Alternative Implementation
-<br>
 In order to compare the async Shiny app to a typical web app, an app is created with JavaScript for the frontend and RServe for the backend. In the UI, JQuery will be used for AJAX requests by clicking buttons. Then the same htmlwidget elements will be rendered to the app. With this setup, it's possible to make multiple requests concurrently in a session and they are all handled asynchronously by a JavaScript-backed app.
 
 ### RServe Backend
-<br>
 So as to render *htmlwidgets* to UI, it is necessary to have a backend API. As discussed in *API Development with R* series ([Part I](/blog/2017-11-18-API-Development-with-R-Part-I), [Part II](/blog/2017-11-19-API-Development-with-R-Part-II)), RServe can be a performant option for building an API. 
 
 I don't plan to use native JavaScript libraries for creating individual widgets. Rather I'm going to render widgets that are created by R. Therefore it is necessary to understand the structure of a widget. `saveWidget()` of the *htmlwidgets* package helps save a widget into a HTML file and it executes `save_html()` of the *htmltools* package. 
@@ -394,7 +388,6 @@ process_request <- function(url, query, body, headers) {
 The source can be found in [here](https://github.com/jaehyeon-kim/more-thoughts-on-shiny/tree/master/api) and the API deployment is included in the [docker compose](https://github.com/jaehyeon-kim/more-thoughts-on-shiny/blob/master/compose-all/docker-compose.yml).
 
 ### JavaScript Frontend
-<br>
 The app will be kept in [index.html](https://github.com/jaehyeon-kim/more-thoughts-on-shiny/blob/master/javascript/index.html) and will be served by a simple [python web server](https://github.com/jaehyeon-kim/more-thoughts-on-shiny/blob/master/javascript/serve.py). Basically the same Bootstrap page is created.
 
 It is important to keep all the widgets' dependent JavaScript and CSS in _head_. We have 3 htmlwidgets and they are wrapped by the *htmlwidgets* package. Therefore it depends on
