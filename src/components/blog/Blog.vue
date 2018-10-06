@@ -1,48 +1,40 @@
 <template>
-    <v-container fluid grid-list-lg>
+    <v-container>
         <v-layout row wrap>
-            <div :class="`${'flex xs10 sm8 md6 ' + (isHidden ? '' : 'offset-xs1')}`">
-                <v-card max-height="250" v-for="(article, i) in selected" :key="i" class="mb-3">
-                    <v-card-text :style="{ cursor: 'pointer'}">
-                        <div @click="openArticle(article)">
-                            <span class="headline">{{ article.title }}</span><br>
-                            <span class="caption">{{ `${dateToString(article.created)}` }}</span><br>                      
-                        </div>
-                    </v-card-text>
-                    <v-divider light></v-divider>
-                    <v-layout>
-                        <div :class="isHidden ? 'flex xs12' : 'flex xs5'">
-                            <div @click="openArticle(article)">                               
-                                <v-img
-                                    :src="`/static/${article.slug}/main.png`"
-                                    height="120"
-                                    contain
-                                    class="mt-1 mb-1"
-                                    :style="{ cursor: 'pointer'}"
-                                >
-                                </v-img>                                
+            <v-flex xs10 md6 offset-xs1 offset-md2>
+                <div v-for="(article, i) in selected" :key="i" @click="openArticle(article)">
+                    <v-card class="my-3" hover>
+                        <v-card-text>
+                            <div class="mb-2">
+                                <span class="headline">{{ article.title }}</span><br>
+                                <span class="caption">{{ `${dateToString(article.created)}` }}</span><br>                      
                             </div>
-                        </div>
-                        <v-flex xs7 class="hidden-sm-and-down">
-                            <v-card-text :style="{ cursor: 'pointer'}">
-                                <div @click="openArticle(article)" class="caption mb-1">{{ article.description.substring(0, maxStr) + '... ' }}</div>
-                            </v-card-text>      
-                        </v-flex>
-                    </v-layout>
-                </v-card>
-            </div>
-			<div class="fixed" v-if="!isHidden">
-                <!-- <v-layout column> -->
-                    <app-blog-side></app-blog-side>
-                <!-- </v-layout> -->
-			</div>
+                            <v-divider></v-divider>
+                            <v-layout row wrap class="mt-4">
+                                <v-flex xs6 v-if="windowWidth > 1000">
+                                    <v-img
+                                        height="180"
+                                        :src="`/static/${article.slug}/main.png`"
+                                        contain
+                                    >
+                                    </v-img>
+                                </v-flex>
+                                <div :class="`${windowWidth > 1000 ? 'flex xs6' : 'flex xs12'}`">
+                                    {{ article.description.substring(0, 400) + '... ' + 'READ MORE' }}
+                                </div>
+                            </v-layout>
+                        </v-card-text>
+                    </v-card>
+                </div>
+            </v-flex>
+			<div class="fixed" v-if="windowWidth > 1000">
+                <app-blog-side></app-blog-side>
+			</div>          
         </v-layout>
     </v-container>
 </template>
 
 <script>
-//height="400" width="530">
-// https://codepen.io/developerplus/pen/mBbjBq | https://www.thepolyglotdeveloper.com/blog/
 import BlogSide from '@/components/blog/BlogSide'
 
 export default {
@@ -55,21 +47,6 @@ export default {
     }
   },  
   computed: {
-    isHidden() {
-        return this.windowWidth < 1000
-    },
-    maxStr() {
-        if (this.windowWidth < 960) {
-            return 100
-        }
-        else if (this.windowWidth < 1264) {
-            return 220
-        } else if (this.windowWidth < 1600) {
-            return 300
-        } else {
-            return 500
-        }
-    },
     articles () {
       return this.$store.getters['blog/articles'].sort((a, b) => {
         if (a.created > b.created) return -1
@@ -107,10 +84,10 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .fixed {
   position: fixed;
-  width: 400px;
+  width: 320px;
   top:8%; 
   right:4%;
 }

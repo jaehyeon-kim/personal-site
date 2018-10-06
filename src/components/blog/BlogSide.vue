@@ -3,7 +3,11 @@
         <v-flex>
             <v-card>
                 <span class="subheading">{{ `${'Catagories (' + cats.map(x => x.name).length + ') '}` }}</span>
-                <span v-if="selection.col === 'category'"><a @click="reset">reset</a></span>
+                <span v-if="selection.col === 'category'">
+                    <a @click="reset" class="ml-2">
+                        <v-icon size="16" color="info">cancel</v-icon>
+                    </a>
+                </span>
                 <v-btn
                     v-for="cat in cats"
                     :key="cat.name"
@@ -18,7 +22,11 @@
         </v-flex>
         <v-flex>
             <span class="subheading">{{ `${'Tags (' + tags.map(x => x.name).length + ')'}` }}</span>
-            <span v-if="selection.col === 'tags'"><a @click="reset">reset</a></span>
+            <span v-if="selection.col === 'tags'">
+                <a @click="reset" class="ml-2">
+                    <v-icon size="16" color="info">cancel</v-icon>
+                </a>
+            </span>
             <highcharts class="chartContainer" :options="chartOptions" :updateArgs="updateArgs" :callback="initChart"></highcharts>
         </v-flex>
     </div>
@@ -100,7 +108,7 @@ export default {
                 maxPadding: 0,
                 title: { text: null },
                 exporting: { enabled: false },
-                credits: { enabled: false },
+                credits: { enabled: true },
                 plotOptions: {
                     series: {
                         cursor: 'pointer',

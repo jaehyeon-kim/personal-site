@@ -10,6 +10,10 @@
           <v-icon size="18" class="mr-1">{{ item.icon }}</v-icon>
           {{ item.title }}
         </v-btn>
+        <v-btn flat small @click="open">
+          <v-icon size="16" class="mr-1">open_in_new</v-icon>
+          old blog
+        </v-btn>
       </v-toolbar-items>
     </v-toolbar>
     <v-content>
@@ -31,6 +35,11 @@ export default {
       items: [
         { icon: 'reorder', title: 'Blog', link: '/blog' },
       ]
+    }
+  },
+  methods: {
+    open () {
+      window.open('http://jaehyeon-kim.github.io/', '_blank')
     }
   },
   created() {
