@@ -14,7 +14,7 @@
                                 <v-flex xs6 v-if="windowWidth > 1000">
                                     <v-img
                                         height="180"
-                                        :src="`/static/${article.slug}/main.png`"
+                                        :src="`/static/main/${article.slug}.png`"
                                         contain
                                     >
                                     </v-img>
