@@ -1,7 +1,7 @@
 ---
 title: 'Serverless Data Product POC Backend Part II'
 category: 'Serverless'
-tags: [Lambda, API Gateway, R, Python]
+tags: [AWS, Lambda, API Gateway, R, Python]
 created: '2017-04-11'
 updated:
 status: publish

@@ -1,7 +1,7 @@
 ---
 title: 'Serverless Data Product POC Backend Part I'
 category: 'Serverless'
-tags: [Lambda, API Gateway, R, Python]
+tags: [AWS, Lambda, API Gateway, R, Python]
 created: '2017-04-08'
 updated:
 status: publish
@@ -318,12 +318,12 @@ aws s3 cp s3://serverless-poc-handlers/admission.zip .
 unzip admission.zip
 
 python ./test_handler.py
-{% endhighlight %}
+```
 
 This is an example testing output where the model object has been downloaded already.
 
 
-{% highlight bash %}
+```bash
 [ec2-user@ip-172-31-71-13 ~]$ python ./test_handler.py
 DEBUG:root:admission.rds already downloaded
 DEBUG:root:admission.rds already downloaded
