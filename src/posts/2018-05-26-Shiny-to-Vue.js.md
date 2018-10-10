@@ -1,7 +1,7 @@
 ---
 title: 'Shiny to Vue.js'
 category: 'Web Development'
-tags: [R, Shiny, Vue]
+tags: [R, Shiny, Vue.js]
 created: '2018-05-26'
 status: publish
 description: 'In the last post, the async feature of Shiny was discussed. Although it is a remarkable step forward to web development in R, it is not to the full extent that a Javascript application can bring. In fact, (long running) requests of a user (or session) are not impacted by those of other users (or sessions) but, for a given user, all requests are handled sequentially. On the other hand, it is not the case for a Javascript-backed app where all requests are processed asynchronously.'
