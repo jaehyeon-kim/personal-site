@@ -20,7 +20,9 @@ In the previous posts, it is discussed how to package/deploy a [R](https://www.r
 
 A simple *single page application* is created using [React](https://facebook.github.io/react/). By clicking the *Check!* button after entering the *GRE*, *GPA* and *Rank* values, information of the expected admimission status pops up in a modal. The status value is `fetch`ed from the API of the POC application that is discussed in [Part III](/blog/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III). The code of this application can be found [here](https://github.com/jaehyeon-kim/serverless-poc/tree/master/poc-web).
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/00-app-01.png)
+</div>
 
 ## Update Lambda function hander
 
@@ -51,7 +53,9 @@ Origin 'http://localhost:9090' is therefore not allowed access. The response had
 
 API Gateway allows to enable CORS and it can be either on a resource or a method within a resource. The *GET* method is selected and *Enable CORS* is clicked after pulling down *actions*.
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/02-enable-cors-01.png)
+</div>
 
 Simply put, another method of *OPTIONS* is created and the following response headers are added to the *GET* and *OPTIONS* methods.
 
@@ -59,15 +63,21 @@ Simply put, another method of *OPTIONS* is created and the following response he
 * Access-Control-Allow-Headers: Added to _OPTIONS_ only, __X-API-Key is allowed__
 * Access-Control-Allow-Origin: Added to both _GET_ and _OPTIONS_
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/02-enable-cors-02.png)
+</div>
 
 Here is all the steps that enables CORS in API Gateway. Note that the necessary headers are added to *200* response only, not to *400* response so that the above error can't be eliminated for *400* response unless the headers are set separately.
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/02-enable-cors-03.png)
+</div>
 
 After that, the API needs to be deployed again and, as can be seen in the deployment history, the latest deployment is selected as the current stage.
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/02-enable-cors-04.png)
+</div>
 
 ### Update handler
 
@@ -197,15 +207,21 @@ index.html
 
 First *read-access* is given to all objects in the bucket (*poc.jaehyeon.me*). It is set in *Bucket Policy* of the permissions tab - *Policy* is discussed in [Part II](/blog/2017-04-11-Serverless-Data-Product-POC-Backend-Part-II).
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/03-s3-setup-02.png)
+</div>
 
 Then, in the properties tab, *static website hosting* is enabled where *index.html* is set to be rendered for both the default and error document. Now it is possible to have access to the application by the *endpoint*.
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/03-s3-setup-03.png)
+</div>
 
 In order to replace the *endpoint* with a custom domain name, a [Canonical name (CNAME) record](https://en.wikipedia.org/wiki/CNAME_record) is created in [Amazon Route 53](https://aws.amazon.com/route53/). Note that the CNAME record (*poc.jaehyeon.me*) has to be the same to the bucket name. `s3-website-us-east-1.amazonaws.com.` is entered in *Value*, which is used to define the host name as an alias for the Amazon S3 bucket. Note the period at the end is necessary as it signifies the DNS root and, if it is not specified, a DNS resolver could append it's default domain to the domain you provided. (See [Customizing Amazon S3 URLs with CNAMEs](http://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html#VirtualHostingCustomURLs) for further details.) Now the application can be accessed using [http://poc.jaehyeon.me](http://poc.jaehyeon.me).
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/04-route53.png)
+</div>
 
 ### CloudFront
 
@@ -213,7 +229,9 @@ It is possible to host the application using *Amazon CloudFront* which is a glob
 
 *Web* is taken as the delivery method.
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/05-cloudfront-01.png)
+</div>
 
 The S3 bucket (*web.jaehyeon.me*) is selected as the origin domain name. Note, unlike relying on the *static website hosting* property where all objects in the bucket are given *read-access*, in this way, access to the bucket is *restricted* only to CloudFront with a newly created identity. The updated bucket policy is shown below. (See [Using an Origin Access Identity to Restrict Access to Your Amazon S3 Content](http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html) for further details.)
 
@@ -236,24 +254,34 @@ The S3 bucket (*web.jaehyeon.me*) is selected as the origin domain name. Note, u
     ]
 }
 ```
- 
+
+<div class="cover"> 
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/05-cloudfront-02.png)
+</div>
 
 In default cache behavior settings, *Redirect HTTP to HTTPS* is selected for the viewer protocol policy. All other options are left untouched - they are not shown.
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/05-cloudfront-03.png)
+</div>
 
 In distribution settings, a CNAME record (*web.jaehyeon.me*) is created to be the same to the bucket name. The custom SSL certificate that is obtained from [AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) is chosen rather than the default CloudFront certificate (See [Part III](/blog/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III)). Finally it is selected to support only clients that support server name indication (SNI). Note all the other options are left untouched - they are not shown.
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/05-cloudfront-04.png)
+</div>
 
 Once the distribution is created, the distribution's CloudFront domain name is created and it is possible to use it to create a custom domain.
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/05-cloudfront-06.png)
+</div>
 
 In Route 53, a new record set is created and `web.jaehyeon.me` is entered in the name field, followed by selecting *A - IPv4 address* as the type. *Alias* is set to be yes and the *distribution domain name* is entered as the alias target.
 
+<div class="cover">
 ![](/static/2017-04-17-Serverless-Data-Product-POC-Frontend-Part-IV/05-cloudfront-07.png)
+</div>
 
 Once it is ready, the application can be accessed using either [http://web.jaehyeon.me](http://web.jaehyeon.me) or [https://web.jaehyeon.me](https://web.jaehyeon.me) where HTTP is redirected to HTTPS.
 

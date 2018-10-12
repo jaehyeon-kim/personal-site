@@ -254,7 +254,9 @@ export default {
 
 The screen shot of the app is shown below.
 
+<div class="cover">
 ![](/static/2018-05-26-Shiny-to-Vue.js/vue-htmlwidgets.png)
+</div>
 
 ### Native Libraries instead of Htmlwidgets
 <br>
@@ -491,4 +493,6 @@ export default {
 
 The screen shot of the app is shown below.
 
+<div class="cover">
 ![](/static/2018-05-26-Shiny-to-Vue.js/vue-native.png)
+</div>

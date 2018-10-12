@@ -240,11 +240,15 @@ locust -f ./locustfile.py --host http://localhost:8000 --no-web -c 3 -r 3
 
 When only 1 request is made successively, the average response time of the APIs is around 500ms. When there are multiple concurrent requests, however, the average response time of the _plumber_ API increases significantly. This is because R is single threaded and requests are _queued_ by _httpuv_. On the other hand, the average response time of the _Rserve_ API stays the same and this is because _Rserve_ handles concurrent requests by _forked_ processes. The performance of the _rApache_ API is in the middle. In practice, it is possible to boost the performance of the _rApache_ API by enabling [Prefork Multi-Processing Module](http://rapache.net/manual.html) although it will consume more memory.
 
+<div class="cover">
 ![](/static/2017-11-19-API-Development-with-R-Part-II/response_time.png)
+</div>
 
 As expected, the _Rserve_ API handles considerably many requests per second. 
 
+<div class="cover">
 ![](/static/2017-11-19-API-Development-with-R-Part-II/req_per_sec.png)
+</div>
 
 Note that the test function in this post is a bit unrealistic as it just waits before returning a value. In practice, R functions will consume more CPU and the average response time will tend to increase when multiple requests are made concurrently. Even in this case, the benefit of forking will persist.
 

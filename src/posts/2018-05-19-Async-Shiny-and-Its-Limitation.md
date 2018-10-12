@@ -122,7 +122,9 @@ For deployment, a Docker image is created that includes the *async-compatible* p
 
 A screen shot of the Shiny app is seen below. It is possible to check the async feature by opening the app in 2 different browsers and hit buttons multiple times across.
 
+<div class="cover">
 ![](/static/2018-05-19-Async-Shiny-and-Its-Limitation/shiny.png)
+</div>
 
 ### Limitation
 You may notice the htmlwidgets are rendered without delay across browsers but it's not the case in the same browser. This is due to the way how [Shiny's flush cycle](https://rstudio.github.io/promises/articles/shiny.html#the-flush-cycle) is implemented. Simply put, a user (or session) is not affected by other users (or sessions) for their async requests. However the async feature of Shiny is of little help for multiple async requests by a single user because all requests are processed one by one as its sync version.

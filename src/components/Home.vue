@@ -40,7 +40,7 @@
           <v-card-text class="indigo darken-3 white--text">             
               <p>
                 <span>I have a mixed background. While I was majoring economics and actuarial studies, I focused on econometrics and applied statistics.</span>
-                <span><a class="white--text" target="_blank" href="https://www.r-project.org/">R</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon> was my preferred tool for quantative analysis among others (SAS, EViews, Gauss and Matlab).</span>
+                <span><a class="white--text" target="_blank" href="https://www.r-project.org/">R</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon> was my preferred tool for quantitative analysis among others (SAS, EViews, Gauss and Matlab).</span>
               </p>
               <p>
                 <span>After finishing my degrees, I began my career in building a database and business applications using MS BI stack - C#, MS SQL Server and SharePoint.</span>

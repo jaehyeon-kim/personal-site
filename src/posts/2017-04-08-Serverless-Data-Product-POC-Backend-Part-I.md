@@ -324,6 +324,7 @@ This is an example testing output where the model object has been downloaded alr
 
 
 ```bash
+
 [ec2-user@ip-172-31-71-13 ~]$ python ./test_handler.py
 DEBUG:root:admission.rds already downloaded
 DEBUG:root:admission.rds already downloaded

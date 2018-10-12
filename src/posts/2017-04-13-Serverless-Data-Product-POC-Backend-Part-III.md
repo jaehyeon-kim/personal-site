@@ -25,11 +25,15 @@ In [Part I](/blog/2017-04-08-Serverless-Data-Product-POC-Backend-Part-I) of this
 
 It can be started by clicking the *Get Started* button if there's no existing API or the *Create API* button if there is an existing one.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A01-create-api-01.png)
+</div>
 
 Amazon API Gageway provides several options to create an API. *New API* is selected for the API of the POC application and the name of the API (*ServerlessPOC*) and description are entered.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A01-create-api-02.png)
+</div>
 
 ### Create resource and method
 
@@ -93,41 +97,57 @@ In Amazon API Gateway, there are two ways to create the resource for the Lambda 
 
 For the API of the POC application, the way with query string is used. First it is necessary to create a resource.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A02-create-resource-01.png)
+</div>
 
 Then the resource is named as *Admit*.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A02-create-resource-02.png)
+</div>
 
 After creating the resource, it is necessary to create one or more [HTTP methods](http://restful-api-design.readthedocs.io/en/latest/methods.html) on it. 
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A03-create-method-01.png)
+</div>
 
 Only the *GET* method is created for this API.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A03-create-method-02.png)
+</div>
 
 Now it is time to integrate the method with the Lambda function. *Lambda Function* is selected as the interation type and *ServerlessPOCAdmission* is selected - note that the region where the Lambda function is deployed should be selected first.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A03-create-method-03.png)
+</div>
 
 ### Configure method execution
 
 The lifecycle of a Lambda function is shown below. A Lambda function is called after *Method Request* and *Integration Request*. Also there are two steps until the result is returned back to the client: *Method Response* and *Integration Response*.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A04-00-method-execution.png)
+</div>
 
 #### Method request
 
 As discussed earlier, only a single resource is created so that a request is made with query string. Therefore the 3 event elements (*gre*, *gpa* and *rank*) should be created in *URL Query String Parameters*. Note that *API Key Required* is set to be *false* and it is necessary to change it to be *true* if the API needs to be protected with an API key - it'll be discussed further below. The other sections (*HTTP Request Header*, *Request Body*, ...) are not touched for this API.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A04-01-method-request.png)
+</div>
 
 #### Integration request
 
 It is possible to update the target backend or to modify data from the incoming request. It is not necessary to change the target backend as it is already set appropriately.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A04-02-integration-request-01.png)
+</div>
 
 Among the 3 event elements (*gre*, *gpa* and *rank*), *rank* is a factor or, at least, it should be a string while the others can be either numbers or *numeric* strings. Therefore the Lambda function will complain if a numeric *rank* value is included in a query string (eg `rank=1`). Although it is possible to modify the Lambda function handler, an easier way is to modify data from the incoming request. 
 
@@ -143,13 +163,17 @@ In *Body Mapping Templates*, the recommended option of *When there are no templa
 }
 ```
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A04-02-integration-request-02.png)
+</div>
 
 #### Method response
 
 If a request is successful, the HTTP status code of 200 is returned. As can be seen in the code of the Lambda function handler above, the status code of 400 is planned to be returned if there is an error. Therefore it is necessary to add 400 response so that it is mapped in *Integration Response*.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A04-04-method-response.png)
+</div>
 
 #### Integration response
 
@@ -163,7 +187,9 @@ The output of a response can be mapped in *Body Mapping Templates*. The body of 
 }
 ```
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A04-03-integration-response-01.png)
+</div>
 
 For 400 response, the HTTP status is identified by `.*"httpStatus":400.*` and the body is mapped as following.
 
@@ -177,13 +203,17 @@ For 400 response, the HTTP status is identified by `.*"httpStatus":400.*` and th
 }
 ```
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A04-03-integration-response-02.png)
+</div>
 
 ## Test API
 
 The API can be tested by adding the 3 elements in query string. As expected, the response returns `{"result": true}` with the HTTP status code of 200.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A05-test-01.png)
+</div>
 
 In order to test 400 response, the value of *gre* is set to be a string (gre). The status code of 400 is returned as expected but it fails to parse the message of the error into JSON. It is necessary to modify the message, referring to [Error Handling Patterns in Amazon API Gateway and AWS Lambda](https://aws.amazon.com/blogs/compute/error-handling-patterns-in-amazon-api-gateway-and-aws-lambda/).
 
@@ -201,17 +231,23 @@ In order to test 400 response, the value of *gre* is set to be a string (gre). T
         ...
 ```
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A05-test-02.png)
+</div>
 
 ## Deploy API
 
 Once testing is done, it is ready to deploy the API.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A06-deploy-01.png)
+</div>
 
 It is possible to create a new stage by selecting *[New Stage]* or to update an existing one by selecting its name in deployment stage. Although it is recommended to create at least 2 stages (eg development and production stage), only a singe production stage is created for the POC application.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A06-deploy-02.png)
+</div>
 
 Once created, the invoke URL can be found when the relevant method (*GET*) is clicked. The default root URL is of the following format.
 
@@ -221,7 +257,9 @@ Once created, the invoke URL can be found when the relevant method (*GET*) is cl
 https://api-id.execute-api.region.amazonaws.com/stage
 ```
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/A06-deploy-03.png)
+</div>
 
 The API has been deployed successfully and it is possible to make a request using *curl* and R's *httr* package as following - note the API ID is hidden.
 
@@ -248,7 +286,9 @@ $result
 
 It is on individual methods whether to enable an API key or not. In order to enable an API key, select the GET method in the resources section and change *API Key Required* to true in *Method Request*. Note that *the API has to be deployed again in order to have the change in effect*.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/K01-make-key-required.png)
+</div>
 
 ### Create usage plan
 
@@ -263,20 +303,29 @@ For further details, see [Manage API Request Throttling](http://docs.aws.amazon.
 
 A usage plan named *ServerlessPOC* is created where the rate, burst and quote are 10 requests per second, 20 requests and 500 requests per day respectively. 
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/K02-usage-plan-01.png)
+</div>
 
 Then the production stage (*prod*) of *ServerlessPOC* API is added to the plan.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/K02-usage-plan-02.png)
+</div>
 
 ### Create API key
 
 An API key can be created in *API Keys* section of the Console. The key is named as *ServerlessPOC* and it is set to be auto-generated.
+
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/K03-api-key-01.png)
+</div>
 
 The usage plan created earlier is added to the API key.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/K03-api-key-02.png)
+</div>
 
 Now the API has been protected with an API key and it is possible to make a request using *curl* and R's *httr* package as following. Note that the API key should be added with the key named *x-api-key*. Without the API key in the header, the request returns *403 Forbidden* error. (Note also tick marks rather than single quotations in `GET()`)
 
@@ -325,15 +374,21 @@ https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/prod/admit
 https://api.jaehyeon.me/poc/admit
 ```
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/D01-create-01.png)
+</div>
 
 When clicking the *save* button above, a *distribution domain name* is assigned by [Amazon CloudFront](https://aws.amazon.com/cloudfront/). This step takes up to 40 minutes to complete and, in the meantime, A-record alias for the API domain name is set up so that it can be mapped to the associated *distribution domain name*.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/D01-create-02.png)
+</div>
 
 In Route 53, a new record set is created and `api.jaehyeon.me` is entered in the name field, followed by selecting *A - IPv4 address* as the type. *Alias* is set to be yes and the *distribution domain name* is entered as the alias target.
 
+<div class="cover">
 ![](/static/2017-04-13-Serverless-Data-Product-POC-Backend-Part-III/D02-map.png)
+</div>
 
 Once it is ready, the custom domain name can be used as an alternative domain name of the API and it is possible to make a request using *curl* and R's *httr* package as following.
 

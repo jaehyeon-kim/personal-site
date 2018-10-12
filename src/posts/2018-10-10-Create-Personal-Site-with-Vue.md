@@ -164,11 +164,15 @@ const mutations = {
 
 [require.context](https://webpack.js.org/api/module-methods/#require-context) allows to specify a whole group of dependencies using a path to the directory with options indicating (1) whether to include subdirectory and (2) a regex filter to return files. Specifically for each markdown post, *yaml header* and *content* are parsed as an object - content is parsed into html. *slug* is created by excluding the path part and file extension. An example article object is shown below.
 
+<div class="cover">
 ![](/static/2018-10-10-Create-Personal-Site-with-Vue/article.png)
+</div>
 
 With articles, blogs are listed as following.
 
+<div class="cover">
 ![](/static/2018-10-10-Create-Personal-Site-with-Vue/blog-list.png)
+</div>
 
 ### Code highlighting
 
@@ -188,14 +192,17 @@ import 'prismjs/components/prism-bash'
 import VuePrism from 'vue-prism'
 Vue.use(VuePrism)
 ```
-
+<div class="cover">
 ![](/static/2018-10-10-Create-Personal-Site-with-Vue/code-highlight.png)
+</div>
 
 ### Highcharts
 
 Visualization is quite important for data products and [Highcharts](https://www.highcharts.com/) is my favourite charting library for its ease of use and [highcharter](http://jkunst.com/highcharter/) - R wrapper of Highcharts. To play with it, I added a word cloud chart that shows the frequency of tags of posts. 
 
+<div class="cover">
 ![](/static/2018-10-10-Create-Personal-Site-with-Vue/wordcloud.png)
+</div>
 
 [Highcharts-Vue](https://github.com/highcharts/highcharts-vue) is used as a Vue plugin.
 
