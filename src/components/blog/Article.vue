@@ -79,10 +79,10 @@ h2, h3, h4 {
 }
 
 .cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    overflow: hidden;    
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  overflow: hidden;    
 }
 
 blockquote {

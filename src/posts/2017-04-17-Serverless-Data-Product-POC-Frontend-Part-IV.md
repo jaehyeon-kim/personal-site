@@ -1,7 +1,7 @@
 ---
 title: 'Serverless Data Product POC Frontend Part IV'
 category: 'Serverless'
-tags: [AWS, Lambda, API Gateway, CloudFront, Route53, R, Python, React]
+tags: [AWS, Lambda, API Gateway, CloudFront, Route53, S3, R, Python, React]
 created: '2017-04-17'
 updated:
 status: publish

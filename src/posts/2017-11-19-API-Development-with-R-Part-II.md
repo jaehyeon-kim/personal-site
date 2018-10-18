@@ -1,7 +1,7 @@
 ---
 title: 'API Development with R Part II'
 category: 'Web Service'
-tags: [R, Rserve, rApache, Plumber]
+tags: [R, Docker, Load Testing, Rserve, rApache, Plumber]
 created: '2017-11-19'
 updated:
 status: publish

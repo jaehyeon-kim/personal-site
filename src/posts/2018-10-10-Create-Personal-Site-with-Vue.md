@@ -1,7 +1,7 @@
 ---
 title: 'Create Personal Site with Vue'
 category: 'Web Development'
-tags: [AWS, CloudFront, Route53, Vue.js, JavaScript]
+tags: [Vue.js, JavaScript]
 created: '2018-10-10'
 updated:
 status: publish
