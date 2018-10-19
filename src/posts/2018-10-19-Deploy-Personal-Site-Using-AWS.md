@@ -1,5 +1,5 @@
 ---
-title: 'Deploy Personal Site in AWS'
+title: 'Deploy Personal Site Using AWS'
 category: 'Web Development'
 tags: [AWS, S3, CloudFront, Route53, Vue.js, JavaScript]
 created: '2018-10-19'
