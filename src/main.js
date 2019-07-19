@@ -17,6 +17,8 @@ import 'prismjs/components/prism-r'
 import 'prismjs/components/prism-python'
 import 'prismjs/components/prism-docker'
 import 'prismjs/components/prism-bash'
+import 'prismjs/components/prism-yaml'
+import 'prismjs/components/prism-json'
 
 import VuePrism from 'vue-prism'
 Vue.use(VuePrism)

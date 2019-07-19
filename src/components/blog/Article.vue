@@ -67,6 +67,10 @@ export default {
 </script>
 
 <style>
+code, p {
+  font-size: 1.1em;
+}
+
 pre > code {
   display: block;
   padding: 1rem;
