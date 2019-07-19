@@ -49,7 +49,9 @@
               <p>Since then, I have been building my career in analytics, developing data products.</p>
               <p>
                 <span><a class="white--text" target="_blank" href="https://www.docker.com/">Docker</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon> has changed the way how I build applications significantly and</span> 
-                <span>these days I'm focusing on creating microservices using <a class="white--text" target="_blank" href="https://kubernetes.io/">Kubernetes</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon>.</span> 
+                <span>these days I'm mainly involved in creating backend web services</span>                 
+              </p>
+              <p>
                 <span>In relation to frontend, <a class="white--text" target="_blank" href="https://vuejs.org/">Vue.js</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon> is my preferred JavaScript framework - this site is built with it.</span>
               </p>
               <p>
