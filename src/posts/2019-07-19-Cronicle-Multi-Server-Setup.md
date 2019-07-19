@@ -5,20 +5,22 @@ tags: [Cronicle, Docker, Nginx]
 created: '2019-07-19'
 updated:
 status: publish
-description: "Accroding to the project site, Cronicle is a multi-server task scheduler and runner, with a web based front-end UI. It handles both scheduled, repeating and on-demand jobs, targeting any number of slave servers, with real-time stats and live log viewer."
+description: "Cronicle is a multi-server task scheduler and runner, with a web based front-end UI. It handles both scheduled, repeating and on-demand jobs, targeting any number of slave servers, with real-time stats and live log viewer. In this post, multi-server configuration of Cronicle will be demonstrated with Docker and Nginx as load balancer. Specifically a single master and backup server will be set up and they will be served behind a load balancer - backup server is a slave server that can take the role of master when the master is not avaialble. "
 ---
 
 Accroding to the [project GitHub repository](https://github.com/jhuckaby/Cronicle), 
 
 > Cronicle is a multi-server task scheduler and runner, with a web based front-end UI. It handles both scheduled, repeating and on-demand jobs, targeting any number of slave servers, with real-time stats and live log viewer.
 
-By default, Cronicle is configured to launch a single master server - task scheduling is controlled by the master server. Therefore, for high availability, it is important that another server takes the role of master when the existing master server fails.
+By default, Cronicle is configured to launch a single master server - task scheduling is controlled by the master server. For high availability, it is important that another server takes the role of master when the existing master server fails.
 
-In this post, multi-server configuration of Cronicle will be demonstrated with Docker and Nginx as load balancer. Specifically a single master and backup server will be set up and they will be served behind a load balancer - backup server is a slave server but take the role of master when the master is not avaialble. The source can be found in this [GitHub repo](https://github.com/jaehyeon-kim/play-cronicle).
+In this post, multi-server configuration of Cronicle will be demonstrated with Docker and Nginx as load balancer. Specifically a single master and backup server will be set up and they will be served behind a load balancer - backup server is a slave server that can take the role of master when the master is not avaialble. 
 
-## Build Cronicle Docker Image
+The source of this post can be found [here](https://github.com/jaehyeon-kim/play-cronicle).
 
-There doesn't seem to be an official Docker image for Cronicle. I just installed it from _python:3.6_ image. The docker file can be found as following.
+## Cronicle Docker Image
+
+There isn't an official Docker image for Cronicle. I just installed it from _python:3.6_ image. The docker file can be found as following.
 
 ```docker
 
@@ -45,7 +47,7 @@ EXPOSE 3014
 ENTRYPOINT ["/docker-entrypoint.sh"]
 ```
 
-As Cronicle is written in Node.js, it should be installed as well. _aws-sdk_ is not required strictly but it is added to test S3 integration later. Port 3012 is the default web port of Cronicle and 3014 is used for server auto-discovery via UDP broadcast - it may not be necessary.
+As Cronicle is written in Node.js, it should be installed as well. _aws-sdk_ is not required strictly but it is added to test S3 integration later. Port 3012 is the default web port of Cronicle and 3014 is used for server auto-discovery via UDP broadcast - it may not be required.
 
 _docker-entrypoint.sh_ is used to start a Cronicle server. For master, one more step is necessary, which is initializing the storage system. An environment variable (_IS_MASTER_) will be used to control storage initialization.
 
@@ -72,16 +74,16 @@ do
 done
 ```
 
-*cronicle-base* docker image is built using the docker file as following.
+A custom docker image, *cronicle-base*, is built using as following.
 
 ```sh
 
 docker build -t=cronicle-base .
 ```
 
-## Load Balancer Setup
+## Load Balancer
 
-Nginx is used as a load balancer. The [config file](https://github.com/jaehyeon-kim/play-cronicle/blob/master/loadbalancer/nginx.conf) can be found as following. It listens port 8080 and pass a request to _cronicle1:3012_ or _cronicle2:3012_ server.
+Nginx is used as a load balancer. The [config file](https://github.com/jaehyeon-kim/play-cronicle/blob/master/loadbalancer/nginx.conf) can be found as following. It listens port 8080 and passes a request to _cronicle1:3012_ or _cronicle2:3012_.
 
 ```sh
 
@@ -104,7 +106,7 @@ http {
 }
 ```
 
-In order for Cronicle servers can be served behind the load balancer, the following changes are necessary (complete config file can be found [here](https://github.com/jaehyeon-kim/play-cronicle/blob/master/sample_conf/config.json).) 
+In order for Cronicle servers to be served behind the load balancer, the following changes are made (complete config file can be found [here](https://github.com/jaehyeon-kim/play-cronicle/blob/master/sample_conf/config.json)).
 
 ```json
 
@@ -119,13 +121,13 @@ In order for Cronicle servers can be served behind the load balancer, the follow
 }
 ```
 
-First, [**base_app_url**](https://github.com/jhuckaby/Cronicle#base_app_url) should be changed to the load balancer URL instead of an individual server's URL. Secondly [**web_direct_connect**](https://github.com/jhuckaby/Cronicle#web_direct_connect) should be changed to _true_. According to the project repository
+First, [**base_app_url**](https://github.com/jhuckaby/Cronicle#base_app_url) should be changed to the load balancer URL instead of an individual server's URL. Secondly [**web_direct_connect**](https://github.com/jhuckaby/Cronicle#web_direct_connect) should be changed to _true_. According to the project repository,
 
-> If you set this parameter to true, then the Cronicle web application will connect directly to your individual Cronicle servers. This is more for multi-server configurations, especially when running behind a load balancer with multiple backup servers. The Web UI must always connect to the master server, so if you have multiple backup servers, it needs a direct connection.
+> If you set this parameter (web_direct_connect) to true, then the Cronicle web application will connect directly to your individual Cronicle servers. This is more for multi-server configurations, especially when running behind a load balancer with multiple backup servers. The Web UI must always connect to the master server, so if you have multiple backup servers, it needs a direct connection.
 
 ## Launch Servers
 
-Docke Compose is used to launch 2 Cronicle servers (master and backup) and a load balancer. Note that the service _cronicle1_ is the master while _cronicle2_ is the backup server. Both servers should have the same configuration file (_config.json_). Also, as the backup server will take the role of master, it should have access to the same data - _./backend/cronicle/data_ is mapped to both the servers. (Cronicle supports S3 or Couchbase as well.)
+Docke Compose is used to launch 2 Cronicle servers (master and backup) and a load balancer. The service _cronicle1_ is for the master while _cronicle2_ is for the backup server. Note that both servers should have the same configuration file (_config.json_). Also, as the backup server will take the role of master, it should have access to the same data - _./backend/cronicle/data_ is mapped to both the servers. (Cronicle supports S3 or Couchbase as well.)
 
 ```yaml
 
@@ -182,12 +184,71 @@ docker-compose up -d
 
 Once started, Cronicle web app will be accessible at *http://localhost:8080* and it's possible to log in as the admin user - username and password are all _admin_.
 
-In `Admin > Servers`, it's possible see the 2 Cronicle servers as following.
+In `Admin > Servers`, it's possible to see that the 2 Cronicle servers are shown. The master server is recognized as expected but the backup server (cronicle2) is not yet added.
 
-<div class="cover">
+<div class="cover" style="margin-top: 15px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
 ![](/static/2019-07-19-Cronicle-Multi-Server-Setup/add-server-01.png)
+</div>
+
+By default, 2 server groups (All Servers and Master Group) are created and the backup server should be added to the Master Group. To do so, the _Hostname Match_ regular expression is modified as following: `^(cronicle[1-2])$`. 
+
+<div class="cover" style="margin-top: 15px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-07-19-Cronicle-Multi-Server-Setup/add-server-02.png)
+</div>
+
+Then it can be shown that the backup server is recognized correctly.
+
+<div class="cover" style="margin-top: 15px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-07-19-Cronicle-Multi-Server-Setup/add-server-03.png)
 </div>
 
 ## Create Event
 
-## Remove Master Server
+A test event is created in order to show that an event that's created in the original master can be available in the backup server when it takes the role of master.
+
+<div class="cover" style="margin-top: 15px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-07-19-Cronicle-Multi-Server-Setup/create-event-01.png)
+</div>
+
+Cronicle has a web UI so that it is easy to manage/monitor scheduled events. It also has management API that many jobs can be performed programmatically. Here an event that runs a simple shell script is created.
+
+<div class="cover" style="margin-top: 15px;margin-bottom: 0px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-07-19-Cronicle-Multi-Server-Setup/create-event-02.png)
+</div>
+
+<div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-07-19-Cronicle-Multi-Server-Setup/create-event-03.png)
+</div>
+
+Once created, it is listed in `Schedule` tab.
+
+<div class="cover" style="margin-top: 15px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-07-19-Cronicle-Multi-Server-Setup/create-event-04.png)
+</div>
+
+## Backup Becomes Master
+
+As mentioned earlier, the backup server will take the role of master when the master becomes unavailable. In order to see this, I removed the master server as following.
+
+```js
+
+docker-compose rm -f cronicle1
+```
+
+After a while, it's possible to see that the backup server becomes master.
+
+<div class="cover" style="margin-top: 15px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-07-19-Cronicle-Multi-Server-Setup/remove-master-01.png)
+</div>
+
+It can also be checked in `Admin > Activity Log`.
+
+<div class="cover" style="margin-top: 15px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-07-19-Cronicle-Multi-Server-Setup/remove-master-02.png)
+</div>
+
+In `Schedule`, the test event can be found.
+
+<div class="cover" style="margin-top: 15px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-07-19-Cronicle-Multi-Server-Setup/remove-master-03.png)
+</div>
