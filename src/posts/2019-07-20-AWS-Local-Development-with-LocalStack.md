@@ -1,6 +1,6 @@
 ---
 title: 'AWS Local Development with LocalStack'
-category: 'Development'
+category: 'Web Service'
 tags: [LocalStack, AWS, Docker, Lambda, S3, SQS, Python, Flask, Flask-RestPlus]
 created: '2019-07-20'
 updated:
@@ -148,7 +148,7 @@ def lambda_handler(event, context):
 
 ## Database
 
-As RDS is not yet supported by LocalStack, a postgres db is created with Docker. Below shows the [initialization SQL script](https://github.com/jaehyeon-kim/play-localstack/blob/master/init/db/run.sql). The web service will do CRUD operations against the table named as _records_. Below shows how this DB is initialized.
+As RDS is not yet supported by LocalStack, a postgres db is created with Docker. The web service will do CRUD operations against the table named as _records_. The [initialization SQL script](https://github.com/jaehyeon-kim/play-localstack/blob/master/init/db/run.sql) is shown below.
 
 ```sql
 
@@ -227,10 +227,10 @@ For LocalStack, it's easier to illustrate by the environment variables.
 * DEFAULT_REGION - Local AWS resources will be created in _ap-southeast-2_ by default
 * LAMBDA_EXECUTOR - By selecting _docker-reuse_, Lambda function will be invoked by another container (based on [lambci/lambda](https://github.com/lambci/lambci) image). Once a container is created, it'll be reused. Note that, in order to invoke a Lambda function in a separate Docker container, it should run in privileged mode (**privileged: true**)
 * LAMBDA_REMOTE_DOCKER - It is set to _false_ so that a Lambda function package can be added from a local path instead of a zip file.
-* LAMBDA_DOCKER_NETWORK - Although the Lambda function is invoked in a separate container, it should be able to discover the database service (_postgres_). By default, Docker Compose creates a network (`<parent-folder>_default`). By setting the relevant network name, the Lambda function can connect to the database with the DNS set by *DB_CONNECT*
+* LAMBDA_DOCKER_NETWORK - Although the Lambda function is invoked in a separate container, it should be able to discover the database service (_postgres_). By default, Docker Compose creates a network (`<parent-folder>_default`) and, specifying the network name, the Lambda function can connect to the database with the DNS set by *DB_CONNECT*
 
 <br>
-Actual AWS resources is created by [*create-resources.sh*](https://github.com/jaehyeon-kim/play-localstack/blob/master/init/create-resources.sh), which will be executed after startup. A SQS queue and Lambda function are created and the queue is mapped to be an event source of the Lambda function.
+Actual AWS resources is created by [*create-resources.sh*](https://github.com/jaehyeon-kim/play-localstack/blob/master/init/create-resources.sh), which will be executed at startup. A SQS queue and Lambda function are created and the queue is mapped to be an event source of the Lambda function.
 
 ```bash
 
@@ -261,5 +261,61 @@ The services can be launched as following.
 docker-compose up -d
 ```
 
-## Run API
+## Test Web Service
 
+Before testing the web service, it can be shown how the SQS and Lambda work by sending a message as following.
+
+```sh
+
+aws --endpoint-url http://localhost:4576 sqs send-message \
+    --queue-url http://localhost:4576/queue/test-queue \
+    --message-body '{"id": null, "message": "test"}'
+```
+
+As shown in the image below, LocalStack invokes the Lambda function in a separate Docker container.
+
+<div class="cover" style="margin-top: 15px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-07-20-AWS-Local-Development-with-Localstack/send-message.png)
+</div>
+
+The web service can be started as following.
+
+```sh
+
+FLASK_APP=api FLASK_ENV=development flask run
+```
+
+Using [HttPie](https://httpie.org/), the record created just before can be checked as following.
+
+```bash
+
+http http://localhost:5000/api/records/4
+```
+
+```json
+
+{
+    "created_on": "2019-07-20T04:26:33.048841+00:00",
+    "id": 4,
+    "message": "test"
+}
+```
+
+For updating it,
+
+```bash
+
+echo '{"message": "test put"}' | \
+    http PUT http://localhost:5000/api/records/4
+
+http http://localhost:5000/api/records/4
+```
+
+```json
+
+{
+    "created_on": "2019-07-20T04:26:33.048841+00:00",
+    "id": 4,
+    "message": "test put"
+}
+```
