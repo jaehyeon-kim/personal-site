@@ -28,12 +28,7 @@
           <v-card-title class="indigo darken-3 white--text">
             <div class="subheading">
               <span>
-                Hi! My name is Jaehyeon Kim and I design and build data products in <a class="white--text" target="_blank" href="https://en.wikipedia.org/wiki/Serverless_computing">serverless</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon>
-              </span>
-              <span>
-                  and <a class="white--text" target="_blank" href="https://en.wikipedia.org/wiki/Microservices">microservices-based</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon> environment.
-                  
-              </span>
+                Hi! My name is Jaehyeon Kim and I design and build data products in <span style="font-style: italic;">containerized environment.</span></span>
             </div>
           </v-card-title>
           <v-divider></v-divider>
@@ -43,13 +38,13 @@
                 <span><a class="white--text" target="_blank" href="https://www.r-project.org/">R</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon> was my preferred tool for quantitative analysis among others (SAS, EViews, Gauss and Matlab).</span>
               </p>
               <p>
-                <span>After finishing my degrees, I began my career in building a database and business applications using MS BI stack - C#, MS SQL Server and SharePoint.</span>
+                <span>After finishing my degrees, I began my career in building database and business applications using MS BI stack - C#, MS SQL Server and SharePoint.</span>
                 <span>While I was working as an analyst developer, I further taught myself R as a programming language and later extended my skillset to include <a class="white--text" target="_blank" href="https://www.python.org/">Python</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon>.</span>
               </p>
-              <p>Since then, I have been building my career in analytics, developing data products.</p>
+              <p>Since then, I have been building my career in analytics and/or data product development.</p>
               <p>
                 <span><a class="white--text" target="_blank" href="https://www.docker.com/">Docker</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon> has changed the way how I build applications significantly and</span> 
-                <span>these days I'm mainly involved in creating backend web services</span>                 
+                <span>I'm highly interested in <a class="white--text" target="_blank" href="https://kubernetes.io/">Kubernetes</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon> for <span style="font-style: italic;">container orchestration.</span></span>                 
               </p>
               <p>
                 <span>In relation to frontend, <a class="white--text" target="_blank" href="https://vuejs.org/">Vue.js</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon> is my preferred JavaScript framework - this site is built with it.</span>
