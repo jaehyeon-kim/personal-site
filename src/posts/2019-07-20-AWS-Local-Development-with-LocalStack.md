@@ -1,7 +1,7 @@
 ---
 title: 'AWS Local Development with LocalStack'
 category: 'Web Service'
-tags: [LocalStack, AWS, Docker, Lambda, S3, SQS, Python, Flask, Flask-RestPlus]
+tags: [LocalStack, AWS, Docker, 'Docker Compose', Lambda, S3, SQS, Python, Flask, Flask-RestPlus]
 created: '2019-07-20'
 updated:
 status: publish

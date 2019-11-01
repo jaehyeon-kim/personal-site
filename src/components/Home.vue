@@ -28,11 +28,15 @@
           <v-card-title class="indigo darken-3 white--text">
             <div class="subheading">
               <span>
-                Hi! My name is Jaehyeon Kim and I design and build data products in <span style="font-style: italic;">containerized environment.</span></span>
+                Hi! My name is Jaehyeon Kim.
+              </span>
             </div>
           </v-card-title>
           <v-divider></v-divider>
-          <v-card-text class="indigo darken-3 white--text">             
+          <v-card-text class="indigo darken-3 white--text">
+              <p>
+                <span class="subheading">I design and build data products in <span style="font-style: italic;">containerized environment.</span></span>
+              </p>      
               <p>
                 <span>I have a mixed background. While I was majoring economics and actuarial studies, I focused on econometrics and applied statistics.</span>
                 <span><a class="white--text" target="_blank" href="https://www.r-project.org/">R</a><v-icon dark size="10" class="mb-2">open_in_new</v-icon> was my preferred tool for quantitative analysis among others (SAS, EViews, Gauss and Matlab).</span>

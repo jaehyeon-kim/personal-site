@@ -7,7 +7,9 @@
                         <v-card-text>
                             <div class="mb-2">
                                 <span class="headline">{{ article.title }}</span><br>
-                                <span class="caption">{{ `${dateToString(article.created)}` }}</span><br>                      
+                                <span class="body-2">{{ `${dateToString(article.created)}` }}</span><br>
+                                <span class="body-2">{{ `${'Category: ' + article.category}` }}</span><br>
+                                <span class="body-2">{{ `${'Tags: ' + article.tags.join(', ')}` }}</span><br>
                             </div>
                             <v-divider></v-divider>
                             <v-layout row wrap class="mt-4">
