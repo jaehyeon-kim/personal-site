@@ -124,6 +124,12 @@ I find the VM IP address changes from time to time and a new IP address can be u
 ![](/static/2019-11-01-Linux-Dev-Environment-on-Windows/remote-ssh-add-new-or-configure-04.png)
 </div>
 
+Currently R doesn't seem to be supported well by VSCode and it may not be necessary thanks to RStudio IDE. I haven't tried installing RStudio Server in WSL but it'll definitely be possible to install it in a VM. Another way of accessing RStudio Server is via Docker. The Docker extension of VSCode can make it easier to run an existing image or to customize your own.
+
+<div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-11-01-Linux-Dev-Environment-on-Windows/remote-ssh-docker.png)
+</div>
+
 ## ConEmu
 
 [ConEmu](https://conemu.github.io/) is a handy Windows terminal tool. By default it has multiple terminals pre-configured - PowerShell, Git Bash, Putty, Chocolatey and more. Also it's possible to set up a custom terminal eg) for SSH.

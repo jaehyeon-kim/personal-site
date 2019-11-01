@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --open --hot --config build/webpack.dev.conf.js",
     "start": "npm run dev",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "upload": "aws s3 sync ./dist s3://jaehyeon-me"
   },
   "dependencies": {
     "highcharts": "^6.1.4",
