@@ -1,3 +1,15 @@
+---
+title: 'Distributed Task Queue with Python and R Example'
+category: 'Development'
+tags: [FastAPI, Celery, Redis, Rserve, R, Python, Docker, 'Docker Compose', Kubernetes, Minikube]
+created: '2019-11-01'
+updated:
+status: publish
+description: ""
+---
+
+While I'm looking into [Apache Airflow](https://airflow.apache.org/), a workflow management tool, I thought it would be beneficial to get some understanding of how [Celery](http://www.celeryproject.org/) works. To do so, I built a simple web service that sends tasks to Celery workers and collects the results from them. [FastAPI](https://fastapi.tiangolo.com/) is used for developing the web service and [Redis](https://redis.io/) is used for the message broker and result backend. During the development, I thought it would be possible to implement similar functionality in R with [Rserve](https://www.rforge.net/Rserve/). Therefore a Rserve-based worker is added to the web service.
+
 ```bash
 kubectl apply -f manifest
 
