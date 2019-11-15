@@ -5,23 +5,22 @@ tags: [FastAPI, Celery, Redis, Rserve, R, Python, Docker, 'Docker Compose', Kube
 created: '2019-11-01'
 updated:
 status: publish
-description: "In this post, it'll be illustrated how a web service is created using FastAPI where tasks are sent to multiple workers. The workers are built with Celery and Rserve. Redis is used as a message broker/result backend for Celery and a key-value store for Rserve. Demos can be run in both Docker Compose and Kubernetes."
+description: "In this post, it'll be illustrated how a web service is created using FastAPI framework where tasks are sent to multiple workers. The workers are built with Celery and Rserve. Redis is used as a message broker/result backend for Celery and a key-value store for Rserve. Demos can be run in both Docker Compose and Kubernetes."
 ---
 
-While I'm looking into [Apache Airflow](https://airflow.apache.org/), a workflow management tool, I thought it would be beneficial to get some understanding of how [Celery](http://www.celeryproject.org/) works. To do so, I built a simple web service that sends tasks to Celery workers and collects the results from them. [FastAPI](https://fastapi.tiangolo.com/) is used for developing the web service and [Redis](https://redis.io/) is used for the message broker and result backend. During the development, I thought it would be possible to implement similar functionality in R with [Rserve](https://www.rforge.net/Rserve/). Therefore a Rserve worker is added as an example as well.
+While I'm looking into [Apache Airflow](https://airflow.apache.org/), a workflow management tool, I thought it would be beneficial to get some understanding of how [Celery](http://www.celeryproject.org/) works. To do so, I built a simple web service that sends tasks to Celery workers and collects the results from them. [FastAPI](https://fastapi.tiangolo.com/) is used for developing the web service and [Redis](https://redis.io/) is used for the message broker and result backend. During the development, I thought it would be possible to implement similar functionality in R with [Rserve](https://www.rforge.net/Rserve/). Therefore a Rserve worker is added as an example as well. Coupling a web service with distributed task queue is beneficial on its own as it helps the service be more responsive by offloading heavyweight and long running processes to task workers.
 
-In this post, it'll be illustrated how a web service is created using FastAPI where tasks are sent to multiple workers. The workers are built with Celery and Rserve. Redis is used as a message broker/result backend for Celery and a key-value store for Rserve. Demos can be run in both [Docker Compose](https://docs.docker.com/compose/) and [Kubernetes](https://kubernetes.io/).
+In this post, it'll be illustrated how a web service is created using FastAPI framework where tasks are sent to multiple workers. The workers are built with Celery and Rserve. Redis is used as a message broker/result backend for Celery and a key-value store for Rserve. Demos can be run in both [Docker Compose](https://docs.docker.com/compose/) and [Kubernetes](https://kubernetes.io/).
 
 The following diagram shows how the apps work together and the source can be found in this [GitHub repo](https://github.com/jaehyeon-kim/k8s-job-queue).
 
-![](/static/2019-11-15-Distributed-Task-Queue-with-Python-and-R-Example/arch.png)
 <div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
 ![](/static/2019-11-15-Distributed-Task-Queue-with-Python-and-R-Example/arch.png)
 </div>
 
 ## Celery Worker
 
-The source of the Celery app and task is shown below. The same Redis DB is used as the message broker and result backend. The task is nothing but iterating to `total`, which is requested from the main web service. In each iteration, it updates its state (`bind=True`) and it is set that a task can be sent to its name (`name="long_task"`). The source of the Celery worker can be found in `/queue_celery/tasks.py`. 
+The source of the Celery app and task is shown below - `/queue_celery/tasks.py`. The same Redis DB is used as the message broker and result backend. The task is nothing but iterating to `total` - the value is from a request. In each iteration, it updates its state (`bind=True`) followed by sleeping for 1 second and it is set that a task can be sent by referring to its name (`name="long_task"`).
 
 ```python
 
@@ -51,7 +50,7 @@ def long_task(self, total):
 
 ## Rserve Worker
 
-The [redux](https://github.com/richfitz/redux) package, Redis client for R, is used to set up the Rserve worker. The function `RR()` checks if a Redis DB is available and returns a `hiredis` object, which is an interface to Redis. The task (`long_task()`) is constructed to be similar to that of Celery. Note that, instead of updating its state, it explicitly updates the output to the Redis DB. In order for the task to be executed asynchronously, a handler function is created - `handle_long_task()`. It's called when the main web service executes a task and it sends the task to a (forked) process so that the request can be handled asynchronously. Finally the status of a task can be obtained by `get_task()` and it pulls it from the Redis DB. Note that, as a R list object is updated/retrieved, it's changed to/from binary. The source of the Rserve worker can be found in `/queue_rserve/tasks.R`.
+[redux](https://github.com/richfitz/redux) package, Redis client for R, and [RSclient](http://www.rforge.net/RSclient/) package, R-based client for Rserve, are used to set up the Rserve worker. The function `RR()` checks if a Redis DB is available and returns a `hiredis` object, which is an interface to Redis. The task (`long_task()`) is constructed to be similar to the Celery task. In order for the task to be executed asynchronously, a handler function (`handle_long_task()`) is used to receive a request from the main web service. Once called, the task function is sent to be evaluated by a Rserve client (`RS.eval()`) - note `wait=FALSE` and `lazy=TRUE`. Its evaluation is asynchronous as the task function is run by a separate forked process. Finally the status of a task can be obtained by `get_task()` and it pulls the status output from the Redis DB - note a R list is converted as binary. The source of the Rserve worker can be found in `/queue_rserve/tasks.R`.
 ```r
 
 RR <- function(check_conn_only = FALSE) {
@@ -117,7 +116,7 @@ get_task <- function(task_id) {
 
 ## Main Web Service
 
-The main service has 2 methods for each of the workers - *POST* for executing a task and *GET* for collecting its status. To execute a task, a value named *total* is required in request body. As soon as a task is sent or executed, it returns the task ID and status value - `ExecuteResp`. A task's status can be obtained by requesting the associating *collect* method where its ID is added as query string. The response is defined by `ResultResp`. The source of the Rserve worker can be found in `/main.py`.
+The main service has 2 methods for each of the workers - *POST* for executing a task and *GET* for collecting its status. To execute a task, a value named *total* is required in request body. As soon as a task is sent or requested, it returns the task ID and status value - `ExecuteResp`. A task's status can be obtained by calling the associating *collect* method with its ID in query string. The response is defined by `ResultResp`. The source of the Rserve worker can be found in `/main.py`.
 
 ```python
 
@@ -201,43 +200,54 @@ async def collect_rserve_task(task_id: str):
 
 ## Docker Compose
 
-The apps can be started with Docker Compose as following.
+The apps can be started with Docker Compose as following - the compose file can be found [here](https://github.com/jaehyeon-kim/k8s-job-queue/blob/master/docker-compose.yml).
 
 ```bash
 
-$ git clone https://github.com/jaehyeon-kim/k8s-job-queue.git
-$ cd k8s-job-queue
-$ docker-compose up -d
+git clone https://github.com/jaehyeon-kim/k8s-job-queue.git
+cd k8s-job-queue
+docker-compose up -d
 ```
 
 The swagger document of the main web service can be visited via `http://localhost:9000/docs` or `http://<vm-ip-address>:9000` if it's started in a VM.
 
-![](/static/2019-11-15-Distributed-Task-Queue-with-Python-and-R-Example/swagger-01.png)
 <div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
 ![](/static/2019-11-15-Distributed-Task-Queue-with-Python-and-R-Example/swagger-01.png)
 </div>
 
-A task can be executed by clicking the *Try it out* button and add value to the request body.
+A task can be started by clicking the *Try it out* button, followed by clicking the *Execute* button. Any value between 1 and 50 can be set as the value *total*.
 
-![](/static/2019-11-15-Distributed-Task-Queue-with-Python-and-R-Example/swagger-02.png)
 <div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
 ![](/static/2019-11-15-Distributed-Task-Queue-with-Python-and-R-Example/swagger-02.png)
 </div>
 
 The status of a task can be checked by adding its ID to query string.
 
-![](/static/2019-11-15-Distributed-Task-Queue-with-Python-and-R-Example/swagger-03.png)
 <div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
 ![](/static/2019-11-15-Distributed-Task-Queue-with-Python-and-R-Example/swagger-03.png)
 </div>
 
 ## Kubernetes
 
+4 groups of resources are necessary to run the apps in Kubernetes and they can be found in [`/manifests`](https://github.com/jaehyeon-kim/k8s-job-queue/tree/master/manifests).
+
+* _webservice.yaml_ - main web service Deployment and Service
+* _queue_celery_ - Celery worker Deployment
+* _queue_rserve_ - Rserve worker Deployment and Service
+* _redis.yaml_ - Redis Deployment and Service
+
+In Kubernetes, *Pod* is one or more containers that work together. *Deployment* handles a replica of Pod (*ReplicaSet*), update strategy and so on. And *Service* allows to connect to a set of *Pod*s from within and outside a Kubernetes cluster. Note that the Celery worker doesn't have a Service resource as it is accessed by the Redis message broker/result backend.
+
+With `kubectl apply`, the following resources are created as shown below. Note only the main web service is accessible by a client outside the cluster. The service is mapped to a specific node port (30000). In Minikube, it can be accessed by `http://<node-ip-address>:3000`. The node IP address can be found by `minikube ip` command.
+
 ```bash
 
-$ kubectl apply -f manifest
+## create resources
+kubectl apply -f manifests
 
-$ kubectl get po,rs,deploy,svc
+## get resources
+kubectl get po,rs,deploy,svc
+
 NAME                                     READY   STATUS    RESTARTS   AGE
 pod/celery-deployment-674d8fb968-2x97k   1/1     Running   0          25s
 pod/celery-deployment-674d8fb968-44lw4   1/1     Running   0          25s
@@ -265,16 +275,18 @@ service/redis-service    ClusterIP   10.99.52.18      <none>        6379/TCP    
 service/rserve-service   ClusterIP   10.105.249.199   <none>        8000/TCP       25s
 ```
 
+The execute/collect pair of requests to the Celery worker are shown below. [HttPie](https://httpie.org/) is used to make HTTP requests.
+
 ```bash
 
-$ echo '{"total": 30}' | http POST http://172.28.175.23:30000/celery/execute
+echo '{"total": 30}' | http POST http://172.28.175.23:30000/celery/execute
 {
     "status": "created",
     "task_id": "87ae7a42-1ec0-4848-bf30-2f68175b38db"
 }
 
-$ export TASK_ID=87ae7a42-1ec0-4848-bf30-2f68175b38db
-$ http http://172.28.175.23:30000/celery/collect?task_id=$TASK_ID
+export TASK_ID=87ae7a42-1ec0-4848-bf30-2f68175b38db
+http http://172.28.175.23:30000/celery/collect?task_id=$TASK_ID
 {
     "current": 18,
     "result": null,
@@ -282,7 +294,9 @@ $ http http://172.28.175.23:30000/celery/collect?task_id=$TASK_ID
     "total": 30
 }
 
-$ http http://172.28.175.23:30000/celery/collect?task_id=$TASK_ID
+# after a while
+
+http http://172.28.175.23:30000/celery/collect?task_id=$TASK_ID
 {
     "current": 30,
     "result": 30,
@@ -291,16 +305,18 @@ $ http http://172.28.175.23:30000/celery/collect?task_id=$TASK_ID
 }
 ```
 
+The following shows the execute/collect pair of the Rserve worker.
+
 ```bash
 
-$ echo '{"total": 30}' | http POST http://172.28.175.23:30000/rserve/execute
+echo '{"total": 30}' | http POST http://172.28.175.23:30000/rserve/execute
 {
     "status": "created",
     "task_id": "f5d46986-1e89-4322-9d4e-7c1da6454534"
 }
 
-$ export TASK_ID=f5d46986-1e89-4322-9d4e-7c1da6454534
-$ http http://172.28.175.23:30000/rserve/collect?task_id=$TASK_ID
+export TASK_ID=f5d46986-1e89-4322-9d4e-7c1da6454534
+http http://172.28.175.23:30000/rserve/collect?task_id=$TASK_ID
 {
     "current": 16,
     "result": null,
@@ -308,7 +324,9 @@ $ http http://172.28.175.23:30000/rserve/collect?task_id=$TASK_ID
     "total": 30
 }
 
-$ http http://172.28.175.23:30000/rserve/collect?task_id=$TASK_ID
+# after a while
+
+http http://172.28.175.23:30000/rserve/collect?task_id=$TASK_ID
 {
     "current": 30,
     "result": 30,
