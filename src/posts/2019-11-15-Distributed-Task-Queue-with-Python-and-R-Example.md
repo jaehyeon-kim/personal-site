@@ -1,6 +1,6 @@
 ---
 title: 'Distributed Task Queue with Python and R Example'
-category: 'Development'
+category: 'Microservices'
 tags: [FastAPI, Celery, Redis, Rserve, R, Python, Docker, 'Docker Compose', Kubernetes, Minikube]
 created: '2019-11-15'
 updated:
