@@ -10,11 +10,11 @@ description: ""
 
 [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) in [Kubernetes](https://kubernetes.io/) exposes HTTP and HTTPS routes from outside the cluster to services within the cluster. By setting rules, it routes requests to appropriate services (precisely requests are sent to individual [Pods](https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/) by [Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)). Rules can be set up dynamically and I find it's more efficient compared to traditional [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy).
 
-[Traefik](https://docs.traefik.io/v1.7/) is a modern HTTP reverse proxy and load balancer and it allows dynamic routing configuration as well. Also it supports multiple providers - Docker, Kubernetes, AWS ECS, AWS DynamoDB to name a few. With Docker, routes configuration can be done simply with a set of labels. In this post, it'll be demonstrated how _path-based_ routing can be set up by Traefik with Docker. Also a centralized authentication will be illustrated with the [Forward Authentication](https://docs.traefik.io/v1.7/configuration/entrypoints/#forward-authentication) feature of Traefik.
+[Traefik](https://docs.traefik.io/v1.7/) is a modern HTTP reverse proxy and load balancer and it can be used as a _Kubernetes_ _Ingress Controller_. Moreover it supports other [providers](https://docs.traefik.io/providers/overview/), which are existing infrastructure components such as orchestrators, container engines, cloud providers, or key-value stores. To name a few, Docker, Kubernetes, AWS ECS, AWS DynamoDB and Consul are [supported providers](https://docs.traefik.io/v1.7/). With _Traefik_, it is possible to configure routing dynamically. Another interesting feature is [Forward Authentication](https://docs.traefik.io/v1.7/configuration/entrypoints/#forward-authentication) where authentication can be handled by an external service. In this post, it'll be demonstrated how _path-based_ routing can be set up by _Traefik with Docker_. Also a centralized authentication will be illustrated with the _Forward Authentication_ feature of _Traefik_.
 
 ## How Traefik works
 
-Below shows an illustration of internal architecture of Traefik.
+Below shows an illustration of [internal architecture](https://docs.traefik.io/v1.7/basics/) of Traefik.
 
 ![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-overview.png)
 <div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
@@ -45,6 +45,7 @@ As the paths of the rules suggest, requests to `/pybackend` are sent to a _backe
 Here is the traefik service defined in the compose file of this example - the full version can be found [here](https://github.com/jaehyeon-kim/k8s-traefik/blob/master/docker-compose.yaml).
 
 ```yaml
+
 version: "3.7"
 services:
   traefik:
@@ -73,14 +74,264 @@ networks:
     name: traefik-network
 ```
 
-It enables the Docker provider (`--docker`) and a custom domain is setup - more on this later. A dedicated network is created for it and other services (`trafic-net`). A single _entrypoint_ is enabled and it's set as default. Monitoring dashboard is also enabled (`--api.dashboard`) and it's set to be served on port 8080.
+In _commands_, the Docker provider is enabled (`--docker`) with a custom domain name (`k8s-traefik.info`). A dedicated network is created and it is used for this and the other services (`trafic-net`). A single HTTP _entrypoint_ is enabled as the default entrypoint. Finally monitoring dashboard is enabled (`--api.dashboard`). In _lables_, it is set to be served via the custom domain (hostname) - port 80 is for individual services while 8080 is for the monitoring UI.
 
-Although it's optional, a custom domain name is setup, which can be accessible locally - it'd be benefical to test HTTPS with self-signed certificates if necessary. To do that
+It is necessary to set up a custom hostname when setting up rules that include multiple hosts or enabling a HTTPS entrypoint. Although neither is discussed in this post, a custom domain (`k8s-traefik.info`), which is accessible only in local environment, is added - another post may come later. The location of _hosts_ file is
 
-**Windows**
+* Windows - `%WINDIR%\System32\drivers\etc\hosts` or `C:\Windows\System32\drivers\etc\hosts`
+* Linux - `/etc/hosts`
+
+And the following entry is added.
 
 ```bash
 
+# using a virtual machine
+<VM-IP-ADDRESS>    k8s-traefik.info
+# or in the same machine
+0.0.0.0            k8s-traefik.info
 ```
 
-In order to access to the service with the custom host name (`k8s-traefik.info`), 
+In order to show how routes are configured dynamically, only the Traefik service is started as following.
+
+```bash
+
+docker-compose up -d traefik
+```
+
+When visiting the monitoring UI via _http://k8s-traefik.info:8080/dashboard_, it's shown that no _frontend_ and _backend_ exists in the _docker_ provider tab.
+
+![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-providers-01.png)
+<div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-providers-01.png)
+</div>
+
+## Services
+
+The authentication service is just checking if there's an authorization header and JWT is _foobar_. If so, it returns 200 response so that requests can be forward to relevant backends. The source is shown below.
+
+```py
+
+import os
+from typing import Dict, List
+from fastapi import FastAPI, Depends, HTTPException
+from pydantic import BaseModel
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.requests import Request
+from starlette.status import HTTP_401_UNAUTHORIZED
+
+app = FastAPI(title="Forward Auth API", docs_url=None, redoc_url=None)
+
+## authentication
+class JWTBearer(HTTPBearer):
+    def __init__(self, auto_error: bool = True):
+        super().__init__(scheme_name="Novice JWT Bearer", auto_error=auto_error)
+
+    async def __call__(self, request: Request) -> None:
+        credentials: HTTPAuthorizationCredentials = await super().__call__(request)
+
+        if credentials.credentials != "foobar":
+            raise HTTPException(HTTP_401_UNAUTHORIZED, detail="Invalid Token")
+
+
+## response models
+class StatusResp(BaseModel):
+    status: str
+
+
+## service methods
+@app.get("/auth", response_model=StatusResp, dependencies=[Depends(JWTBearer())])
+async def forward_auth():
+    return {"status": "ok"}
+```
+
+The service is defined as following.
+
+```yaml
+
+...
+  forward-auth:
+    image: kapps/trafik-demo:pybackend
+    networks:
+      - traefik-net
+    depends_on:
+      - traefik
+    command: >
+      forward_auth:app
+      --host=0.0.0.0
+      --port=8000
+      --reload
+...
+```
+
+The Python service has 3 endpoints. The app's title and path value are returned when requests are made to `/` and `/{p}`. Those to `/admission` calls the Rserve service and returns a result from it. Note that an authorization header is not necessary between services.
+
+```py
+import os
+import httpx
+from fastapi import FastAPI
+from pydantic import BaseModel, Schema
+from typing import Optional
+
+APP_PREFIX = os.environ["APP_PREFIX"]
+
+app = FastAPI(title="{0} API".format(APP_PREFIX), docs_url=None, redoc_url=None)
+
+## response models
+class NameResp(BaseModel):
+    title: str
+
+
+class PathResp(BaseModel):
+    title: str
+    path: str
+
+
+class AdmissionReq(BaseModel):
+    gre: int = Schema(None, ge=0, le=800)
+    gpa: float = Schema(None, ge=0.0, le=4.0)
+    rank: str = Schema(None)
+
+
+class AdmissionResp(BaseModel):
+    result: bool
+
+
+## service methods
+@app.get("/", response_model=NameResp)
+async def whoami():
+    return {"title": app.title}
+
+
+@app.post("/admission")
+async def admission(*, req: Optional[AdmissionReq]):
+    host = os.getenv("RSERVE_HOST", "localhost")
+    port = os.getenv("RSERVE_PORT", "8000")
+    async with httpx.AsyncClient() as client:
+        dat = req.json() if req else None
+        r = await client.post("http://{0}:{1}/{2}".format(host, port, "admission"), data=dat)
+        return r.json()
+
+
+@app.get("/{p}", response_model=PathResp)
+async def whichpath(p: str):
+    print(p)
+    return {"title": app.title, "path": p}
+```
+
+The Python service is configured with _lables_. It's enabled and the same docker network is used. In _frontend_ rules, 
+
+* requests are set to be forwarded if host is `k8s-traefik.info` and path is `/pybackend` - _PathPrefixStrip_ to allow the path and subpaths.
+* authentication service is called and its address is _http://forward-auth:8080/auth_.
+* Authorization header is set to be copied to request - guess it's not necessary and can be excluded
+
+If the _frontend_ rules pass, requests are sent to _pybackend_ backend on port 8000.
+
+```yaml
+
+...
+  pybackend:
+    image: kapps/trafik-demo:pybackend
+    networks:
+      - traefik-net
+    depends_on:
+      - traefik
+      - forward-auth
+      - rbackend
+    command: >
+      main:app
+      --host=0.0.0.0
+      --port=8000
+      --reload
+    expose:
+      - 8000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.frontend.rule=Host:k8s-traefik.info;PathPrefixStrip:/pybackend"
+      - "traefik.frontend.auth.forward.address=http://forward-auth:8000/auth"
+      - "traefik.frontend.auth.forward.authResponseHeaders=Authorization"
+      - "traefik.backend=pybackend"
+      - "traefik.port=8000"
+    environment:
+      APP_PREFIX: "Python Backend"
+      RSERVE_HOST: "rbackend"
+      RSERVE_PORT: "8000"
+...
+```
+
+### R Service
+
+[UCLA Institute for Digital Research & Education](https://stats.idre.ucla.edu/r/dae/logit-regression/).
+
+```r
+DAT <- read.csv('./binary.csv')
+DAT$rank <- factor(DAT$rank)
+
+value_if_null <- function(v, DAT) {
+  if (class(DAT[[v]]) == 'factor') {
+    tt <- table(DAT[[v]])
+    names(tt[tt==max(tt)])
+  } else {
+    mean(DAT[[v]])
+  }
+}
+
+set_newdata <- function(args_called) {
+  args_init <- list(gre=NULL, gpa=NULL, rank=NULL)
+  newdata <- lapply(names(args_init), function(n) {
+    if (is.null(args_called[[n]])) {
+      args_init[[n]] <- value_if_null(n, DAT)
+    } else {
+      args_init[[n]] <- args_called[[n]]
+    }
+  })
+  names(newdata) <- names(args_init)
+  lapply(names(newdata), function(n) {
+    flog.info(sprintf("%s - %s", n, newdata[[n]]))
+  })
+  newdata <- as.data.frame(newdata)
+  newdata$rank <- factor(newdata$rank, levels = levels(DAT$rank))
+  newdata
+}
+
+admission <- function(gre=NULL, gpa=NULL, rank=NULL, ...) {
+  newdata <- set_newdata(args_called = as.list(sys.call()))
+  logit <- glm(admit ~ gre + gpa + rank, data = DAT, family = "binomial")
+  resp <- predict(logit, newdata=newdata, type="response")
+  flog.info(sprintf("resp - %s", resp))
+  list(result = resp > 0.5)
+}
+
+whoami <- function() {
+    list(title=sprintf("%s API", Sys.getenv("APP_PREFIX", "RSERVE")))
+}
+```
+
+```yaml
+
+...
+  rbackend:
+    image: kapps/trafik-demo:rbackend
+    networks:
+      - traefik-net
+    depends_on:
+      - traefik
+      - forward-auth
+    command: >
+      --slave
+      --RS-conf /home/app/rserve.conf
+      --RS-source /home/app/rserve-src.R
+    expose:
+      - 8000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.frontend.rule=Host:k8s-traefik.info;PathPrefixStrip:/rbackend"
+      - "traefik.frontend.auth.forward.address=http://forward-auth:8000/auth"
+      - "traefik.frontend.auth.forward.authResponseHeaders=Authorization"
+      - "traefik.backend=rbackend"
+      - "traefik.port=8000"
+    environment:
+      APP_PREFIX: "R Backend"
+...
+```
