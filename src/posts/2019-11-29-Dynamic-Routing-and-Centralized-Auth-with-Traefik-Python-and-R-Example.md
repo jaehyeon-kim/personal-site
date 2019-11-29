@@ -5,7 +5,7 @@ tags: [Traefik, FastAPI, Rserve, R, Python, Docker, 'Docker Compose']
 created: '2019-11-29'
 updated:
 status: publish
-description: ""
+description: "In this post, it'll be demonstrated how path-based routing can be set up by Traefik with Docker. Also a centralized authentication will be illustrated with the Forward Authentication feature of Traefik"
 ---
 
 [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) in [Kubernetes](https://kubernetes.io/) exposes HTTP and HTTPS routes from outside the cluster to services within the cluster. By setting rules, it routes requests to appropriate services (precisely requests are sent to individual [Pods](https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/) by [Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)). Rules can be set up dynamically and I find it's more efficient compared to traditional [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy).
@@ -16,7 +16,6 @@ description: ""
 
 Below shows an illustration of [internal architecture](https://docs.traefik.io/v1.7/basics/) of Traefik.
 
-![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-overview.png)
 <div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
 ![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-overview.png)
 </div>
@@ -35,7 +34,6 @@ In this example, a HTTP _entrypoint_ is setup on port 80. Requests through it ar
 
 As the paths of the rules suggest, requests to `/pybackend` are sent to a _backend_ service, created with [FastAPI](https://fastapi.tiangolo.com/features/). If the other rule is met, requests are sent to the [Rserve](https://www.rforge.net/Rserve/) _backend_ service. Note that only requests from authenticated users are fowarded to relevant _backends_ and it is configured in _frontend_ rules as well. Below shows how authentication is handled.
 
-![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-forward-auth.png)
 <div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
 ![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-forward-auth.png)
 </div>
@@ -76,7 +74,7 @@ networks:
 
 In _commands_, the Docker provider is enabled (`--docker`) with a custom domain name (`k8s-traefik.info`). A dedicated network is created and it is used for this and the other services (`trafic-net`). A single HTTP _entrypoint_ is enabled as the default entrypoint. Finally monitoring dashboard is enabled (`--api.dashboard`). In _lables_, it is set to be served via the custom domain (hostname) - port 80 is for individual services while 8080 is for the monitoring UI.
 
-It is necessary to set up a custom hostname when setting up rules that include multiple hosts or enabling a HTTPS entrypoint. Although neither is discussed in this post, a custom domain (`k8s-traefik.info`), which is accessible only in local environment, is added - another post may come later. The location of _hosts_ file is
+It is necessary to have a custom hostname when setting up rules that include multiple hosts or enabling a HTTPS entrypoint. Although neither is discussed in this post, a custom domain (`k8s-traefik.info`), which is accessible only in local environment, is added - another post may come later. The location of _hosts_ file is
 
 * Windows - `%WINDIR%\System32\drivers\etc\hosts` or `C:\Windows\System32\drivers\etc\hosts`
 * Linux - `/etc/hosts`
@@ -100,14 +98,13 @@ docker-compose up -d traefik
 
 When visiting the monitoring UI via _http://k8s-traefik.info:8080/dashboard_, it's shown that no _frontend_ and _backend_ exists in the _docker_ provider tab.
 
-![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-providers-01.png)
 <div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
 ![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-providers-01.png)
 </div>
 
 ## Services
 
-The authentication service is just checking if there's an authorization header and JWT is _foobar_. If so, it returns 200 response so that requests can be forward to relevant backends. The source is shown below.
+The authentication service is just checking if there's an authorization header and the JWT value is _foobar_. If so, it returns 200 response so that requests can be forward to relevant backends. The source is shown below.
 
 ```py
 
@@ -144,7 +141,7 @@ async def forward_auth():
     return {"status": "ok"}
 ```
 
-The service is defined as following.
+The service is defined in the compose file as following.
 
 ```yaml
 
@@ -163,9 +160,10 @@ The service is defined as following.
 ...
 ```
 
-The Python service has 3 endpoints. The app's title and path value are returned when requests are made to `/` and `/{p}`. Those to `/admission` calls the Rserve service and returns a result from it. Note that an authorization header is not necessary between services.
+The Python service has 3 endpoints. The app's title and path value are returned when requests are made to `/` and `/{p}` - a variable path value. Those to `/admission` calls the Rserve service and relays results from it - see the Rseve service section for the request payload. Note that an authorization header is not necessary between services.
 
 ```py
+
 import os
 import httpx
 from fastapi import FastAPI
@@ -218,11 +216,11 @@ async def whichpath(p: str):
     return {"title": app.title, "path": p}
 ```
 
-The Python service is configured with _lables_. It's enabled and the same docker network is used. In _frontend_ rules, 
+The Python service is configured with _lables_. Traefik is enabled and the same docker network is used. In _frontend_ rules, 
 
-* requests are set to be forwarded if host is `k8s-traefik.info` and path is `/pybackend` - _PathPrefixStrip_ to allow the path and subpaths.
+* requests are set to be forwarded if host is `k8s-traefik.info` and path is `/pybackend` - _PathPrefixStrip_ is to allow the path and its subpaths.
 * authentication service is called and its address is _http://forward-auth:8080/auth_.
-* Authorization header is set to be copied to request - guess it's not necessary and can be excluded
+* authorization header is set to be copied to request - it's for adding a custom header to a request and _this label is mistakenly added_.
 
 If the _frontend_ rules pass, requests are sent to _pybackend_ backend on port 8000.
 
@@ -261,9 +259,10 @@ If the _frontend_ rules pass, requests are sent to _pybackend_ backend on port 8
 
 ### R Service
 
-[UCLA Institute for Digital Research & Education](https://stats.idre.ucla.edu/r/dae/logit-regression/).
+`whoami()` that returns the service name is executed when a request is made to the base path (`/`) - see [here](https://github.com/jaehyeon-kim/k8s-traefik/blob/master/rbackend/process-req.R#L47) for details. To `/admission`, an admission result of a graduate school is returned by fitting a simple logistic regression. The result is based on 3 fields - GRE (Graduate Record Exam scores), GPA (grade point average) and prestige of the undergraduate institution. It's from [UCLA Institute for Digital Research & Education](https://stats.idre.ucla.edu/r/dae/logit-regression/). If a field is missing, the mean or majority level is selected.
 
 ```r
+
 DAT <- read.csv('./binary.csv')
 DAT$rank <- factor(DAT$rank)
 
@@ -307,6 +306,8 @@ whoami <- function() {
 }
 ```
 
+The Rserve service is configured with _lables_ as well.
+
 ```yaml
 
 ...
@@ -335,3 +336,79 @@ whoami <- function() {
       APP_PREFIX: "R Backend"
 ...
 ```
+
+In order to check dynamic routes configuration, the Python service is started as following. Note that, as it depends on the authentication and Rserve service, these are started as well.
+
+```bash
+
+docker-compose up -d pybackend
+```
+
+Once those services are started, the frontends/backends of the Python and Rserve services appear in the monitoring UI.
+
+<div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-providers-00.png)
+</div>
+
+Below shows some request examples.
+
+```bash
+
+#### Authentication failure responses from authentication server
+http http://k8s-traefik.info/pybackend
+# HTTP/1.1 403 Forbidden
+# ...
+# {
+#     "detail": "Not authenticated"
+# }
+
+http http://k8s-traefik.info/pybackend "Authorization: Bearer foo"
+# HTTP/1.1 401 Unauthorized
+# ...
+# {
+#     "detail": "Invalid Token"
+# }
+
+#### Successful responses from Python service
+http http://k8s-traefik.info/pybackend "Authorization: Bearer foobar"
+# {
+#     "title": "Python Backend API"
+# }
+
+http http://k8s-traefik.info/pybackend/foobar "Authorization: Bearer foobar"
+# {
+#     "path": "foobar",
+#     "title": "Python Backend API"
+# }
+
+#### Succesesful responses from Rserve service
+http http://k8s-traefik.info/rbackend "Authorization: Bearer foobar"
+# {
+#     "title": "R Backend API"
+# }
+
+#### Successful responses from requests to /admission
+echo '{"gre": 600, "rank": "1"}' \
+  | http POST http://k8s-traefik.info/rbackend/admission "Authorization: Bearer foobar"
+# {
+#     "result": true
+# }
+
+echo '{"gre": 600, "rank": "1"}' \
+  | http POST http://k8s-traefik.info/pybackend/admission "Authorization: Bearer foobar"
+# {
+#     "result": true
+# }
+```
+
+The _HEALTH_ tab of the monitoring UI shows some request metrics. After running the following for a while, the page is updated as shown below.
+
+```bash
+
+while true; do echo '{"gre": 600, "rank": "1"}' \
+  | http POST http://k8s-traefik.info/pybackend/admission "Authorization: Bearer foobar"; sleep 1; done
+```
+
+<div class="cover" style="margin-top: 0px;margin-bottom: 15px;margin-left: 10px;margin-right: 10px">
+![](/static/2019-11-29-Dynamic-Routing-and-Centralized-Auth-with-Traefik-Python-and-R-Example/traefik-health.png)
+</div>
