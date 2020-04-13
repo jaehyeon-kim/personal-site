@@ -106,7 +106,7 @@ When visiting the monitoring UI via _http://k8s-traefik.info:8080/dashboard_, it
 
 The authentication service is just checking if there's an authorization header and the JWT value is _foobar_. If so, it returns 200 response so that requests can be forward to relevant backends. The source is shown below.
 
-```py
+```python
 
 import os
 from typing import Dict, List
@@ -162,7 +162,7 @@ The service is defined in the compose file as following.
 
 The Python service has 3 endpoints. The app's title and path value are returned when requests are made to `/` and `/{p}` - a variable path value. Those to `/admission` calls the Rserve service and relays results from it - see the Rseve service section for the request payload. Note that an authorization header is not necessary between services.
 
-```py
+```python
 
 import os
 import httpx
