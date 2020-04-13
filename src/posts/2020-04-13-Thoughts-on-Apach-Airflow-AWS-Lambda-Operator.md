@@ -1,7 +1,7 @@
 ---
 title: 'Thoughts on Apache Airflow AWS Lambda Operator'
 category: 'Data Engineering'
-tags: [Apache Airflow, AWS Lambda, Python, Docker, Docker Compose]
+tags: [Apache Airflow, AWS, Lambda, Python, Docker, Docker Compose]
 created: '2020-04-13'
 updated:
 status: publish
