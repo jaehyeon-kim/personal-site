@@ -11,7 +11,7 @@
     "upload": "aws s3 sync ./dist s3://jaehyeon-me"
   },
   "dependencies": {
-    "highcharts": "^6.1.4",
+    "highcharts": "^7.2.2",
     "highcharts-vue": "^1.2.0",
     "prismjs": "^1.15.0",
     "vue": "^2.5.2",
