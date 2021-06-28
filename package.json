@@ -13,7 +13,7 @@
   "dependencies": {
     "highcharts": "^6.1.4",
     "highcharts-vue": "^1.2.0",
-    "prismjs": "^1.15.0",
+    "prismjs": "^1.24.0",
     "vue": "^2.5.2",
     "vue-prism": "^1.0.5",
     "vue-router": "^3.0.1",
